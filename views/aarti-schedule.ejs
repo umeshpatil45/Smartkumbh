@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Aarti Experience | Nashik Guide</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bot-green: #00e676;
+            --gold: #FFD700;
+            --glass: rgba(0, 0, 0, 0.7);
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            height: 100%; width: 100%;
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden;
+            background: #000;
+        }
+
+        /* VIDEO FIX: Path changed from public/images/ to /images/ */
+        #video-bg {
+            position: fixed;
+            top: 50%; left: 50%;
+            min-width: 100%; min-height: 100%;
+            width: auto; height: auto;
+            z-index: -1;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+            filter: brightness(0.4) blur(2px);
+        }
+
+        .wrapper {
+            width: 100%; height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            position: relative;
+        }
+
+        .container {
+            width: 420px; height: 85vh;
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border-radius: 35px;
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex; flex-direction: column;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.9);
+            z-index: 10;
+            position: relative;
+        }
+
+        .header {
+            padding: 25px; text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .header h3 { margin: 0; color: #fff; letter-spacing: 1.5px; text-transform: uppercase; font-size: 1.2rem; }
+
+        .content {
+            flex: 1; padding: 20px;
+            overflow-y: auto; scrollbar-width: none;
+        }
+
+        /* PREMIUM CARDS */
+        .aarti-card {
+            background: rgba(255,255,255,0.06);
+            margin-bottom: 15px; padding: 18px;
+            border-radius: 20px; display: flex; align-items: center;
+            gap: 15px; border-left: 5px solid var(--bot-green);
+            transition: 0.3s;
+        }
+
+        .aarti-card:hover { background: rgba(255,255,255,0.1); transform: scale(1.02); }
+
+        .time-circle {
+            width: 65px; height: 65px;
+            border: 2px solid var(--bot-green);
+            border-radius: 50%; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            font-weight: bold; color: var(--bot-green); font-size: 0.8rem;
+            background: rgba(0, 230, 118, 0.1);
+        }
+
+        .info h4 { margin: 0; font-size: 1rem; color: #fff; }
+        .info p { margin: 3px 0; font-size: 0.75rem; color: var(--gold); opacity: 0.9; }
+
+        /* MOVING ROBO */
+        .side-robo {
+            position: absolute;
+            right: -90px;
+            bottom: 40px;
+            width: 160px;
+            z-index: 15;
+            animation: roboFloat 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 15px var(--bot-green));
+        }
+
+        @keyframes roboFloat {
+            0%, 100% { transform: translateY(0) rotate(-2deg); }
+            50% { transform: translateY(-25px) rotate(5deg); }
+        }
+
+        .action-btn {
+            background: linear-gradient(90deg, #FF8C00, #FFD700);
+            color: #000; padding: 16px; margin: 20px;
+            border-radius: 50px; text-align: center;
+            text-decoration: none; font-weight: 800;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            box-shadow: 0 10px 25px rgba(255, 140, 0, 0.4);
+            letter-spacing: 1px;
+        }
+
+        .live-dot {
+            width: 12px; height: 12px; background: red;
+            border-radius: 50%; animation: blink 0.8s infinite;
+        }
+
+        @keyframes blink { 50% { opacity: 0; } }
+        .back-btn { position: absolute; top: 25px; left: 20px; color: #fff; z-index: 100; }
+
+    </style>
+</head>
+<body>
+
+    <video autoplay muted loop playsinline id="video-bg">
+        <source src="/images/aarti.mp4" type="video/mp4">
+    </video>
+
+    <div class="wrapper">
+        <div class="container">
+            <a href="javascript:history.back()" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+            
+            <div class="header">
+                <i class="fas fa-om" style="color: var(--gold); font-size: 1.8rem; margin-bottom: 10px;"></i>
+                <h3>Nashik Spiritual Guide</h3>
+            </div>
+
+            <div class="content">
+                <div class="aarti-card">
+                    <div class="time-circle">07:00 <span>PM</span></div>
+                    <div class="info">
+                        <h4>Godavari Maha Aarti</h4>
+                        <p><i class="fas fa-map-marker-alt"></i> Ram Kund, Panchavati</p>
+                    </div>
+                </div>
+
+                <div class="aarti-card" style="border-left-color: var(--gold);">
+                    <div class="time-circle" style="border-color: var(--gold); color: var(--gold);">05:30 <span>AM</span></div>
+                    <div class="info">
+                        <h4>Mangal Aarti</h4>
+                        <p><i class="fas fa-map-marker-alt"></i> Trimbakeshwar Temple</p>
+                    </div>
+                </div>
+
+                <div class="aarti-card" style="border-left-color: #ff4e50;">
+                    <div class="time-circle" style="border-color: #ff4e50; color: #ff4e50;">12:00 <span>PM</span></div>
+                    <div class="info">
+                        <h4>Madhyanha Aarti</h4>
+                        <p><i class="fas fa-map-marker-alt"></i> Kalaram Mandir</p>
+                    </div>
+                </div>
+
+                <div class="aarti-card">
+                    <div class="time-circle">08:00 <span>PM</span></div>
+                    <div class="info">
+                        <h4>Shej Aarti</h4>
+                        <p><i class="fas fa-map-marker-alt"></i> Muktidham, Nashik Rd</p>
+                    </div>
+                </div>
+
+                <div class="aarti-card" style="border-left-color: var(--gold);">
+                    <div class="time-circle" style="border-color: var(--gold); color: var(--gold);">06:30 <span>AM</span></div>
+                    <div class="info">
+                        <h4>Abhishek Aarti</h4>
+                        <p><i class="fas fa-map-marker-alt"></i> Someshwar Temple</p>
+                    </div>
+                </div>
+            </div>
+
+            <a href="https://www.youtube.com/results?search_query=live+nashik+aarti" target="_blank" class="action-btn">
+                <div class="live-dot"></div> WATCH LIVE DARSHAN
+            </a>
+
+            <img src="/images/Robo.png" class="side-robo" alt="Robo Assistant">
+        </div>
+    </div>
+
+</body>
+</html>

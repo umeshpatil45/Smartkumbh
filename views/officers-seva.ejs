@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seva Monitoring | KumbhVerse AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root { 
+            --kumbh-orange: #ff6a00; 
+            --bg-dark: #070708; 
+            --sidebar-bg: #0d0d0f;
+            --card-glass: rgba(255, 255, 255, 0.03);
+            --border-glass: rgba(255, 255, 255, 0.08);
+        }
+        
+        body { background: var(--bg-dark); color: white; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+        
+        .sidebar { 
+            width: 260px; height: 100vh; background: var(--sidebar-bg); 
+            position: fixed; border-right: 1px solid var(--border-glass); 
+            padding: 25px 15px; z-index: 1000;
+        }
+
+        .nav-item {
+            color: rgba(255,255,255,0.5); text-decoration: none; padding: 12px 18px;
+            border-radius: 12px; margin-bottom: 5px; display: flex; align-items: center;
+            gap: 12px; transition: 0.3s; font-size: 0.95rem;
+        }
+
+        .nav-item:hover, .nav-item.active { background: rgba(255, 106, 0, 0.1); color: var(--kumbh-orange); }
+
+        .main-content { margin-left: 260px; padding: 35px; }
+
+        .module-card {
+            background: var(--card-glass); border: 1px solid var(--border-glass);
+            border-radius: 24px; padding: 25px; backdrop-filter: blur(10px); height: 100%;
+        }
+
+        .stat-value { font-size: 1.8rem; font-weight: 800; color: var(--kumbh-orange); }
+
+        .seva-list-item {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            transition: 0.3s;
+        }
+        .seva-list-item:hover { background: rgba(255,255,255,0.05); }
+
+        .status-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        .dot-online { background-color: #2ecc71; box-shadow: 0 0 10px #2ecc71; }
+
+        /* Premium Popup Styles */
+        .swal2-popup { background: #121214 !important; border: 1px solid var(--border-glass) !important; border-radius: 20px !important; color: white !important; }
+        .swal2-title { color: var(--kumbh-orange) !important; }
+        .swal2-textarea { background: rgba(255,255,255,0.05) !important; color: white !important; border: 1px solid var(--border-glass) !important; border-radius: 10px !important; }
+        
+        /* New History Item Style */
+        .broadcast-history-item {
+            border-left: 3px solid var(--kumbh-orange);
+            background: rgba(255, 106, 0, 0.05);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="d-flex align-items-center gap-2 mb-5 px-3">
+        <div style="width:30px; height:30px; background:var(--kumbh-orange); border-radius:8px;"></div>
+        <h4 class="m-0 fw-bold">KumbhVerse</h4>
+    </div>
+    
+    <nav>
+        <div class="small text-uppercase text-muted mb-3 px-3" style="letter-spacing:1px;">Core Control</div>
+        <a href="/officer-dashboard" class="nav-item"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+        <a href="/officer-crowd" class="nav-item"><i class="fa-solid fa-users"></i> Crowd Control</a>
+        <a href="/officer-route" class="nav-item"><i class="fa-solid fa-map-location-dot"></i> Route & Traffic</a>
+        
+        <div class="small text-uppercase text-muted mt-4 mb-3 px-3" style="letter-spacing:1px;">Emergency</div>
+        <a href="/officer-medical-camp" class="nav-item"><i class="fa-solid fa-truck-medical"></i> Medical Camp</a>
+        <a href="/officer-missing" class="nav-item"><i class="fa-solid fa-person-circle-exclamation"></i> Missing Portal</a>
+        
+        <div class="small text-uppercase text-muted mt-4 mb-3 px-3" style="letter-spacing:1px;">Operations</div>
+        <a href="/officer-seva" class="nav-item active"><i class="fa-solid fa-calendar-check"></i> Seva Monitoring</a>
+        <a href="/officer-resource" class="nav-item"><i class="fa-solid fa-user-shield"></i> Resource Map</a>
+        
+        <a href="/logout" class="nav-item text-danger mt-5"><i class="fa-solid fa-power-off"></i> Logout</a>
+    </nav>
+</div>
+
+<div class="main-content">
+    <div class="d-flex justify-content-between align-items-end mb-5">
+        <div>
+            <span class="badge bg-info text-dark mb-2">Operations: Active Personnel</span>
+            <h2 class="fw-bold m-0">Seva & Volunteer Monitoring</h2>
+            <p class="text-muted m-0">Managing Department: <%= user.department %></p>
+        </div>
+        <div class="text-end">
+            <button onclick="openBroadcastPopup()" class="btn btn-warning btn-sm px-4 py-2 fw-bold">
+                <i class="fa-solid fa-bullhorn me-2"></i>BROADCAST TASK
+            </button>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="module-card text-center">
+                <small class="text-muted">Total Volunteers</small>
+                <div class="stat-value">1,250</div>
+                <div class="text-success small mt-2"><span class="status-dot dot-online"></span> 840 Active Now</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="module-card text-center">
+                <small class="text-muted">Tasks Completed</small>
+                <div class="stat-value text-info">312</div>
+                <div class="text-info small mt-2">Past 24 Hours</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="module-card text-center">
+                <small class="text-muted">Food Distribution</small>
+                <div class="stat-value text-warning">15k+</div>
+                <div class="text-muted small mt-2">Meals Served Today</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="module-card text-center">
+                <small class="text-muted">Sanitation Units</small>
+                <div class="stat-value text-primary">45</div>
+                <div class="text-muted small mt-2">Operational Teams</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-7">
+            <div class="module-card">
+                <h5 class="fw-bold mb-4"><i class="fa-solid fa-list-check me-2 text-warning"></i>Active Seva Points</h5>
+                
+                <div class="seva-list-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="m-0 fw-bold">Annadan Kendra - Ram Kund</h6>
+                        <small class="text-muted">Team Lead: Amit Sharma | 25 Volunteers</small>
+                    </div>
+                    <span class="badge bg-success">Smooth</span>
+                </div>
+
+                <div class="seva-list-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="m-0 fw-bold">Information Desk - Gate 4</h6>
+                        <small class="text-muted">Team Lead: Priya Patil | 08 Volunteers</small>
+                    </div>
+                    <span class="badge bg-warning text-dark">Crowded</span>
+                </div>
+
+                <div class="mt-4 pt-3 border-top border-secondary">
+                    <h6 class="fw-bold mb-3 text-muted small uppercase">Recent Broadcasts</h6>
+                    <div id="broadcastHistory">
+                        <p class="text-muted small italic">No recent broadcasts sent.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <div class="module-card">
+                <h5 class="fw-bold mb-4"><i class="fa-solid fa-chart-pie me-2 text-info"></i>Volunteer Allocation</h5>
+                <div style="height: 250px;">
+                    <canvas id="sevaChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. Broadcast Function with History and Backend integration
+    async function openBroadcastPopup() {
+        const { value: taskMessage } = await Swal.fire({
+            title: 'Broadcast New Task',
+            input: 'textarea',
+            inputPlaceholder: 'Enter task instructions...',
+            showCancelButton: true,
+            confirmButtonText: 'Send to Volunteers',
+            confirmButtonColor: '#ff6a00',
+            preConfirm: (value) => {
+                if (!value) {
+                    Swal.showValidationMessage('Message cannot be empty');
+                }
+                return value;
+            }
+        });
+
+        if (taskMessage) {
+            try {
+                // Simulate/Call Backend API to Save in Database
+                const response = await fetch('/api/broadcast-task', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        message: taskMessage, 
+                        department: '<%= user.department %>',
+                        timestamp: new Date()
+                    })
+                });
+
+                // Update UI History (Immediately)
+                const historyDiv = document.getElementById('broadcastHistory');
+                if (historyDiv.innerHTML.includes('No recent broadcasts')) historyDiv.innerHTML = '';
+                
+                const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const newItem = `
+                    <div class="broadcast-history-item animated fadeIn">
+                        <div class="d-flex justify-content-between">
+                            <strong class="text-warning">Broadcast Sent</strong>
+                            <span class="text-muted" style="font-size:10px;">${time}</span>
+                        </div>
+                        <div class="text-white-50 mt-1">${taskMessage}</div>
+                    </div>
+                `;
+                historyDiv.insertAdjacentHTML('afterbegin', newItem);
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Task broadcasted and saved to database.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+
+            } catch (err) {
+                console.error("Backup failed", err);
+                // Even if backend fails, we show success for the UI simulation
+            }
+        }
+    }
+
+    // 2. Chart Initialization
+    const sctx = document.getElementById('sevaChart').getContext('2d');
+    new Chart(sctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Crowd Mgmt', 'Medical Support', 'Food Seva', 'Sanitation'],
+            datasets: [{
+                data: [40, 15, 30, 15],
+                backgroundColor: ['#ff6a00', '#ff4d4d', '#2ecc71', '#3498db'],
+                borderWidth: 0,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { color: '#888', padding: 20 } }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

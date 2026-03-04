@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Officer Login | KumbhVerse</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #0a0a0c; color: white; height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .login-card { background: rgba(255,255,255,0.05); padding: 40px; border-radius: 20px; width: 400px; border: 1px solid rgba(255,255,255,0.1); }
+        .form-control { background: #000; border: 1px solid #333; color: white; margin-bottom: 20px; }
+        .btn-login { background: #ff6a00; border: none; font-weight: bold; width: 100%; padding: 10px; color: white; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <h3 class="text-center mb-4">Officer Login</h3>
+        <% if (typeof error !== 'undefined') { %>
+            <div class="alert <%= error.includes('Denied') ? 'alert-warning' : 'alert-danger' %> py-2 small"><%= error %></div>
+        <% } %>
+        <form action="/officers-login" method="POST">
+            <input type="text" name="accessId" class="form-control" placeholder="Access ID" required>
+            <input type="password" name="password" class="form-control" placeholder="Security PIN" required>
+            <button type="submit" class="btn-login">AUTHORIZE ACCESS</button>
+        </form>
+        <p class="text-center mt-3 small">New Officer? <a href="/register" style="color:#ff6a00;">Register Here</a></p>
+    </div>
+</body>
+</html>

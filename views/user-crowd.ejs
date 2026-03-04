@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Crowd Status | Nashik Guide</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bot-green: #00e676;
+            --bg-dark: #0b0e11;
+            --card-bg: #15191c;
+            --text-main: #ffffff;
+            --border-color: #2a2f32;
+        }
+
+        body {
+            background: #0b141a;
+            color: var(--text-main);
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 550px;
+            height: 90vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .container {
+            width: 420px;
+            height: 100%;
+            background: var(--card-bg);
+            border-radius: 25px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            z-index: 2;
+        }
+
+        /* Header */
+        .header {
+            background: #202c33;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .back-btn { color: white; text-decoration: none; margin-right: 15px; font-size: 1.2rem; }
+
+        /* Robot Position */
+        .side-robot {
+            position: absolute;
+            right: -50px;
+            bottom: 20px;
+            width: 320px;
+            z-index: 5;
+            pointer-events: none;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.4));
+        }
+
+        /* Status List */
+        .status-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            scrollbar-width: none;
+        }
+
+        .location-card {
+            background: #202c33;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+        }
+
+        .loc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .loc-name { font-weight: bold; font-size: 1rem; color: var(--bot-green); }
+
+        /* Crowd Bar */
+        .progress-bg {
+            background: #2a3942;
+            height: 10px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+        }
+
+        .status-text { font-size: 0.8rem; opacity: 0.8; }
+        
+        /* Legends */
+        .low { background: #00e676; }
+        .med { background: #ffc107; }
+        .high { background: #ff5252; }
+
+        .update-tag {
+            font-size: 0.7rem;
+            text-align: center;
+            padding: 10px;
+            color: var(--bot-green);
+            background: rgba(0,230,118,0.1);
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <div class="container">
+        <div class="header">
+            <a href="javascript:history.back()" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+            <div>
+                <h3 style="margin:0">Live Crowd Tracker</h3>
+                <small style="color:var(--bot-green)">Nashik Kumbh Real-time</small>
+            </div>
+        </div>
+
+        <div class="update-tag">
+            <i class="fas fa-sync fa-spin"></i> Auto-updating every 5 seconds
+        </div>
+
+        <div class="status-content" id="crowd-list">
+            </div>
+        
+        <div style="padding: 15px; background: #202c33; text-align: center; font-size: 0.8rem; border-top: 1px solid var(--border-color);">
+            <i class="fas fa-info-circle"></i> Avoid <b>High Density</b> areas for a faster darshan.
+        </div>
+    </div>
+
+    <img src="images/ai-Robo.png" class="side-robot" alt="Guide Robot">
+</div>
+
+<script>
+    const locations = [
+        { name: "Ram Kund", base: 85, suffix: "Very Crowded" },
+        { name: "Trimbakeshwar Temple", base: 70, suffix: "Crowded" },
+        { name: "Kalaram Temple", base: 40, suffix: "Moderate" },
+        { name: "Sita Gufa", base: 60, suffix: "Crowded" },
+        { name: "Pandav Leni", base: 15, suffix: "Empty" },
+        { name: "Sula Vineyards", base: 30, suffix: "Normal" },
+        { name: "Muktidham", base: 25, suffix: "Normal" }
+    ];
+
+    function updateStatus() {
+        const list = document.getElementById('crowd-list');
+        list.innerHTML = '';
+
+        locations.forEach(loc => {
+            // Simulate random movement in crowd
+            const randomVar = Math.floor(Math.random() * 15) - 7; 
+            const finalLoad = Math.min(100, Math.max(5, loc.base + randomVar));
+            
+            let colorClass = "low";
+            let statusNote = "Low Crowd";
+
+            if(finalLoad > 75) {
+                colorClass = "high";
+                statusNote = "Heavy Crowd (Wait time: 2hrs+)";
+            } else if(finalLoad > 45) {
+                colorClass = "med";
+                statusNote = "Moderate Crowd (Wait time: 45m)";
+            } else {
+                colorClass = "low";
+                statusNote = "Peaceful (Direct Entry)";
+            }
+
+            const card = `
+                <div class="location-card">
+                    <div class="loc-header">
+                        <span class="loc-name">${loc.name}</span>
+                        <span style="font-size:0.8rem">${finalLoad}%</span>
+                    </div>
+                    <div class="progress-bg">
+                        <div class="progress-fill ${colorClass}" style="width: ${finalLoad}%"></div>
+                    </div>
+                    <div class="status-text">${statusNote}</div>
+                </div>
+            `;
+            list.innerHTML += card;
+        });
+    }
+
+    // Initial load and set interval
+    updateStatus();
+    setInterval(updateStatus, 5000);
+</script>
+
+</body>
+</html>

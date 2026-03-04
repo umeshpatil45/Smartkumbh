@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Officer Dashboard | KumbhVerse AI</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        :root { 
+            --orange: #ff6a00; 
+            --dark: #050506; 
+            --glass: rgba(255, 255, 255, 0.03); 
+            --border: rgba(255, 255, 255, 0.1);
+            --text-gray: #b0b0b0; 
+        }
+        
+        body { 
+            background: var(--dark); 
+            color: white; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            margin: 0; 
+            display: flex; 
+            overflow-x: hidden;
+        }
+
+        /* --- Sidebar --- */
+        .sidebar { 
+            width: 280px; background: #0a0a0c; 
+            border-right: 1px solid var(--border); 
+            height: 100vh; position: fixed; padding: 25px;
+            z-index: 1000;
+        }
+        .sidebar-brand { color: var(--orange); font-size: 22px; font-weight: 800; text-decoration: none; margin-bottom: 40px; display: block; }
+        .nav-label { color: var(--text-gray); font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; margin: 25px 0 10px 10px; }
+        .nav-link { 
+            color: white; padding: 12px 15px; border-radius: 12px; display: flex; align-items: center; 
+            transition: 0.3s; text-decoration: none; margin-bottom: 5px; opacity: 0.8;
+        }
+        .nav-link i { width: 25px; color: var(--orange); font-size: 18px; margin-right: 10px; }
+        .nav-link:hover { background: var(--glass); opacity: 1; transform: translateX(5px); color: var(--orange); }
+        .nav-link.active { background: var(--orange); color: white; opacity: 1; box-shadow: 0 10px 20px rgba(255, 106, 0, 0.2); }
+        .nav-link.active i { color: white; }
+
+        /* --- Main Content --- */
+        .main-content { margin-left: 280px; width: calc(100% - 280px); padding: 40px; }
+        
+        .premium-card { 
+            background: var(--glass); border: 1px solid var(--border); 
+            border-radius: 24px; padding: 25px; transition: 0.4s; height: 100%;
+            backdrop-filter: blur(12px);
+        }
+        .premium-card:hover { border-color: var(--orange); background: rgba(255, 255, 255, 0.05); }
+
+        .stat-icon {
+            width: 45px; height: 45px; background: rgba(255, 106, 0, 0.1);
+            color: var(--orange); border-radius: 12px; display: flex;
+            align-items: center; justify-content: center; font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .badge-live { 
+            background: rgba(255, 0, 0, 0.1); color: #ff4d4d; border: 1px solid #ff4d4d;
+            font-size: 10px; padding: 5px 12px; border-radius: 50px; font-weight: 700;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        /* --- Top Navigation / Logout Area --- */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .officer-profile {
+            display: flex;
+            align-items: center;
+            background: var(--glass);
+            padding: 8px 20px;
+            border-radius: 50px;
+            border: 1px solid var(--border);
+            gap: 15px;
+        }
+
+        .officer-info { text-align: right; }
+        .officer-name { font-size: 14px; font-weight: 700; margin: 0; }
+        .officer-dept { font-size: 10px; color: var(--text-gray); margin: 0; text-transform: uppercase; }
+        
+        .logout-btn {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: 0.3s;
+            border: 1px solid rgba(231, 76, 60, 0.2);
+        }
+        .logout-btn:hover { background: #e74c3c; color: white; transform: rotate(90deg); }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: var(--dark); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <a href="#" class="sidebar-brand">OFFICER<span class="text-white">PORTAL</span></a>
+
+        <div class="nav-label">Main Console</div>
+        <a href="/officer-dashboard" class="nav-link active"><i class="fas fa-chart-line"></i> Analytics</a>
+        <a href="/officer-crowd" class="nav-link"><i class="fas fa-users-rays"></i> Crowd Control</a>
+        <a href="/officer-route" class="nav-link"><i class="fas fa-route"></i> Route Mgmt</a>
+
+        <div class="nav-label">Emergency</div>
+        <a href="/officers-medical-camp" class="nav-link"><i class="fas fa-kit-medical"></i> Medical Camp</a>
+        <a href="/officers-missing" class="nav-link"><i class="fas fa-person-circle-question"></i> Missing Reports</a>
+        
+        <div class="nav-label">Resource</div>
+        <a href="/officers-resource" class="nav-link"><i class="fas fa-map-location-dot"></i> Tactical Map</a>
+        <a href="/officers-seva" class="nav-link"><i class="fas fa-hand-holding-heart"></i> Seva Status</a>
+
+        <div style="margin-top: 100px;">
+            <a href="/logout" class="nav-link text-danger"><i class="fas fa-power-off"></i> Logout</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="top-nav">
+            <div>
+                <h2 class="fw-bold m-0">Duty Command Center 🛡️</h2>
+                <p class="text-secondary small m-0">Kumbh Mela 2027 | Real-time Officer Surveillance</p>
+            </div>
+            
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge-live d-none d-md-inline-block"><i class="fas fa-circle me-2"></i>SYSTEM ONLINE</span>
+                
+                <div class="officer-profile">
+                    <div class="officer-info">
+                        <p class="officer-name">On-Duty Officer</p>
+                        <p class="officer-dept">Nashik Security Grid</p>
+                    </div>
+                    <div class="vh-line" style="width: 1px; height: 25px; background: var(--border);"></div>
+                    <a href="/logout" class="logout-btn" title="Logout System">
+                        <i class="fas fa-power-off"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="premium-card">
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    <p class="small text-secondary mb-1">Live Footfall</p>
+                    <h3 class="fw-bold m-0" id="crowdCount">94,201</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="premium-card">
+                    <div class="stat-icon" style="color:#2ecc71; background:rgba(46,204,113,0.1);"><i class="fas fa-shield-halved"></i></div>
+                    <p class="small text-secondary mb-1">Security Status</p>
+                    <h3 class="fw-bold m-0 text-success" style="font-size: 22px;">SECURE</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="premium-card">
+                    <div class="stat-icon" style="color:#3498db; background:rgba(52,152,219,0.1);"><i class="fas fa-truck-medical"></i></div>
+                    <p class="small text-secondary mb-1">Medical Alerts</p>
+                    <h3 class="fw-bold m-0">12</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="premium-card">
+                    <div class="stat-icon" style="color:#e74c3c; background:rgba(231,76,60,0.1);"><i class="fas fa-triangle-exclamation"></i></div>
+                    <p class="small text-secondary mb-1">Alert Zones</p>
+                    <h3 class="fw-bold m-0">03</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-8">
+                <div class="premium-card">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="fw-bold m-0">Crowd Flow Analytics</h5>
+                        <select class="form-select form-select-sm bg-dark text-white border-secondary" style="width: 120px; font-size: 12px;">
+                            <option>Last 24 Hours</option>
+                            <option>Last 7 Days</option>
+                        </select>
+                    </div>
+                    <div style="height: 320px;">
+                        <canvas id="crowdChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="premium-card">
+                    <h5 class="fw-bold mb-3 text-danger"><i class="fas fa-bullhorn me-2"></i>Missing Reports</h5>
+                    <div id="dynamic-missing-list" style="height: 250px; overflow-y: auto;">
+                        <p class="text-center text-muted small mt-5">Fetching reports...</p>
+                    </div>
+                    <hr class="border-secondary">
+                    <a href="/officers-missing" class="btn btn-outline-warning btn-sm w-100 py-2" style="border-radius: 10px;">View Full Database</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. Premium Graph Logic
+        const ctx = document.getElementById('crowdChart').getContext('2d');
+        
+        // Create Gradient for the line
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(255, 106, 0, 0.4)');
+        gradient.addColorStop(1, 'rgba(255, 106, 0, 0)');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['06:00', '09:00', '12:00', '15:00', '18:00', '21:00', '00:00'],
+                datasets: [{
+                    label: 'Crowd Density',
+                    data: [15000, 38000, 72000, 55000, 92000, 68000, 25000],
+                    borderColor: '#ff6a00',
+                    borderWidth: 4,
+                    pointBackgroundColor: '#ff6a00',
+                    pointBorderColor: 'rgba(255,255,255,0.2)',
+                    pointHoverRadius: 7,
+                    fill: true,
+                    backgroundColor: gradient,
+                    tension: 0.4 // Smoothing curves
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false },
+                        ticks: { color: '#888', font: { size: 11 } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#888', font: { size: 11 } }
+                    }
+                }
+            }
+        });
+
+        // 2. Crowd Counter Simulation
+        setInterval(() => {
+            const el = document.getElementById('crowdCount');
+            if(el) {
+                let val = parseInt(el.innerText.replace(',', ''));
+                val += Math.floor(Math.random() * 50) - 10;
+                el.innerText = val.toLocaleString();
+            }
+        }, 2000);
+
+        // 3. Fake Data for Missing List
+        const fakeMissing = [
+            { name: "Rahul Sharma", zone: "Sector A", status: "Recent" },
+            { name: "Sunita Verma", zone: "Ram Kund", status: "Critical" },
+            { name: "Aarav Gupta", zone: "Tapovan", status: "Recent" }
+        ];
+
+        window.onload = () => {
+            const list = document.getElementById('dynamic-missing-list');
+            list.innerHTML = fakeMissing.map(p => `
+                <div class="p-3 mb-2" style="background: rgba(255,255,255,0.02); border-radius:15px; border-left: 3px solid ${p.status === 'Critical' ? '#e74c3c' : '#ff6a00'};">
+                    <div class="d-flex justify-content-between">
+                        <span class="small fw-bold">${p.name}</span>
+                        <span class="badge ${p.status === 'Critical' ? 'bg-danger' : 'bg-warning text-dark'}" style="font-size:8px;">${p.status}</span>
+                    </div>
+                    <p class="m-0 text-secondary" style="font-size:11px;">Location: ${p.zone}</p>
+                </div>
+            `).join('');
+        };
+    </script>
+</body>
+</html>

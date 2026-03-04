@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Missing Persons Portal | KumbhVerse AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root { 
+            --kumbh-orange: #ff6a00; 
+            --bg-dark: #070708; 
+            --sidebar-bg: #0d0d0f;
+            --card-glass: rgba(255, 255, 255, 0.03);
+            --border-glass: rgba(255, 255, 255, 0.08);
+        }
+        
+        body { background: var(--bg-dark); color: white; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+        .sidebar { width: 260px; height: 100vh; background: var(--sidebar-bg); position: fixed; border-right: 1px solid var(--border-glass); padding: 25px 15px; z-index: 1000; }
+        .nav-item { color: rgba(255,255,255,0.5); text-decoration: none; padding: 12px 18px; border-radius: 12px; margin-bottom: 5px; display: flex; align-items: center; gap: 12px; transition: 0.3s; font-size: 0.95rem; }
+        .nav-item:hover, .nav-item.active { background: rgba(255, 106, 0, 0.1); color: var(--kumbh-orange); }
+        .main-content { margin-left: 260px; padding: 35px; }
+        .module-card { background: var(--card-glass); border: 1px solid var(--border-glass); border-radius: 24px; padding: 25px; backdrop-filter: blur(10px); height: 100%; transition: transform 0.3s ease; }
+        .stat-value { font-size: 1.8rem; font-weight: 800; color: var(--kumbh-orange); }
+        .heatmap-container { height: 250px; width: 100%; position: relative; }
+        .custom-table { border-collapse: separate; border-spacing: 0 10px; }
+        .custom-table tr { background: rgba(255,255,255,0.02); }
+        .custom-table td, .custom-table th { padding: 15px; border: none; vertical-align: middle; }
+        .custom-table tr td:first-child { border-radius: 12px 0 0 12px; }
+        .custom-table tr td:last-child { border-radius: 0 12px 12px 0; }
+        .search-box { background: rgba(255,255,255,0.05); border: 1px solid var(--border-glass); border-radius: 12px; color: white; padding: 10px 20px; }
+        .search-box:focus { background: rgba(255,255,255,0.08); color: white; border-color: var(--kumbh-orange); box-shadow: none; }
+        .swal2-popup { background: #121214 !important; color: white !important; border: 1px solid var(--border-glass); }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="d-flex align-items-center gap-2 mb-5 px-3">
+        <div style="width:30px; height:30px; background:var(--kumbh-orange); border-radius:8px;"></div>
+        <h4 class="m-0 fw-bold">KumbhVerse</h4>
+    </div>
+    
+    <nav>
+        <div class="small text-uppercase text-muted mb-3 px-3" style="letter-spacing:1px;">Core Control</div>
+        <a href="/officer-dashboard" class="nav-item"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+        <a href="/officer-crowd" class="nav-item"><i class="fa-solid fa-users"></i> Crowd Control</a>
+        <a href="/officer-route" class="nav-item"><i class="fa-solid fa-map-location-dot"></i> Route & Traffic</a>
+        
+        <div class="small text-uppercase text-muted mt-4 mb-3 px-3" style="letter-spacing:1px;">Emergency</div>
+        <a href="/officer-medical-camp" class="nav-item"><i class="fa-solid fa-truck-medical"></i> Medical Camp</a>
+        <a href="/officer-missing" class="nav-item active"><i class="fa-solid fa-person-circle-exclamation"></i> Missing Portal</a>
+        
+        <div class="small text-uppercase text-muted mt-4 mb-3 px-3" style="letter-spacing:1px;">Operations</div>
+        <a href="/officer-seva" class="nav-item"><i class="fa-solid fa-calendar-check"></i> Seva Monitoring</a>
+        <a href="/officer-resource" class="nav-item"><i class="fa-solid fa-user-shield"></i> Resource Map</a>
+        
+        <a href="/logout" class="nav-item text-danger mt-5"><i class="fa-solid fa-power-off"></i> Logout</a>
+    </nav>
+</div>
+
+<div class="main-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold m-0">Missing Persons - <%= assignedZone %></h2>
+        <button onclick="reportMissing()" class="btn btn-warning px-4 py-2 fw-bold" style="border-radius: 12px; background: var(--kumbh-orange); border: none;">
+            <i class="fa-solid fa-plus me-2"></i>REPORT MISSING
+        </button>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-8">
+            <div class="module-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="m-0">Recent Missing Reports</h5>
+                    <input type="text" id="tableSearch" class="form-control search-box w-50" placeholder="Search by name or ID...">
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-dark custom-table" id="missingTable">
+                        <thead>
+                            <tr class="text-muted">
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Last Seen</th>
+                                <th>Status</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="missingTableBody">
+                            <tr>
+                                <td class="fw-bold text-info">#MK-902</td>
+                                <td>Rahul S.</td>
+                                <td>Ram Kund</td>
+                                <td><span class="badge bg-danger px-3 py-2">Open</span></td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-outline-light me-2" onclick="viewDetails('#MK-902')"><i class="fa-solid fa-eye"></i></button>
+                                    <button class="btn btn-sm btn-success" onclick="markFound(this)"><i class="fa-solid fa-check"></i> Found</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="module-card">
+                <h5 class="mb-3">Zone Density Analytics</h5>
+                <div class="heatmap-container">
+                    <canvas id="crowdChart"></canvas>
+                </div>
+                <div class="mt-4 p-3 border border-secondary rounded-4 bg-dark">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <small class="text-muted d-block">Current Zone Status</small>
+                            <span class="fw-bold text-success">Controlled</span>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted d-block">Live People</small>
+                            <span id="live-crowd-count" class="stat-value">85K</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. Search Logic
+    document.getElementById('tableSearch').addEventListener('keyup', function() {
+        let value = this.value.toLowerCase();
+        let rows = document.querySelectorAll('#missingTable tbody tr');
+        rows.forEach(row => {
+            row.style.display = (row.innerText.toLowerCase().indexOf(value) > -1) ? "" : "none";
+        });
+    });
+
+    // 2. Navin data Table madhe add karnyache logic
+    function addRowToTable(name, location) {
+        const tableBody = document.getElementById('missingTableBody');
+        const randomId = '#MK-' + Math.floor(100 + Math.random() * 900); // Random ID generator
+        
+        const newRow = document.createElement('tr');
+        newRow.style.animation = "fadeIn 0.5s ease-in-out"; // Animation effect
+        newRow.innerHTML = `
+            <td class="fw-bold text-info">${randomId}</td>
+            <td>${name}</td>
+            <td>${location}</td>
+            <td><span class="badge bg-danger px-3 py-2">Open</span></td>
+            <td class="text-end">
+                <button class="btn btn-sm btn-outline-light me-2" onclick="viewDetails('${randomId}')"><i class="fa-solid fa-eye"></i></button>
+                <button class="btn btn-sm btn-success" onclick="markFound(this)"><i class="fa-solid fa-check"></i> Found</button>
+            </td>
+        `;
+        
+        // SarvAT varti add kara
+        tableBody.insertBefore(newRow, tableBody.firstChild);
+    }
+
+    // 3. New Report Logic (Updated with addRowToTable)
+    function reportMissing() {
+        Swal.fire({
+            title: 'New Missing Report',
+            html: `
+                <input id="swal-input1" class="swal2-input" style="color:white" placeholder="Name">
+                <input id="swal-input2" class="swal2-input" style="color:white" placeholder="Last Seen Location">
+            `,
+            focusConfirm: false,
+            confirmButtonText: 'Submit Report',
+            confirmButtonColor: '#ff6a00',
+            showCancelButton: true,
+            preConfirm: () => {
+                const name = document.getElementById('swal-input1').value;
+                const loc = document.getElementById('swal-input2').value;
+                if (!name || !loc) {
+                    Swal.showValidationMessage(`Please enter both name and location`);
+                }
+                return { name: name, location: loc }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Function call karun data table madhe taka
+                addRowToTable(result.value.name, result.value.location);
+                Swal.fire('Submitted!', 'Broadcast sent to all officers.', 'success');
+            }
+        });
+    }
+
+    // 4. Found Status Logic
+    function markFound(btn) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This person will be marked as found.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#2ecc71',
+            confirmButtonText: 'Yes, Found!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                let row = btn.closest('tr');
+                row.style.opacity = '0.5';
+                row.querySelector('.badge').className = 'badge bg-success px-3 py-2';
+                row.querySelector('.badge').innerText = 'Resolved';
+                btn.remove();
+                Swal.fire('Updated!', 'Record moved to resolved.', 'success');
+            }
+        });
+    }
+
+    // Chart.js Setup
+    const ctx = document.getElementById('crowdChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['10:00', '10:15', '10:30', '10:45', '11:00', '11:15', '11:30'],
+            datasets: [{
+                data: [85, 90, 95, 99, 92, 88, 96],
+                borderColor: '#ff6a00',
+                backgroundColor: 'rgba(255, 106, 0, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { display: false },
+                x: { grid: { display: false }, ticks: { color: '#555' } }
+            }
+        }
+    });
+
+    setInterval(() => {
+        let count = (85 + Math.random() * 5).toFixed(1);
+        document.getElementById('live-crowd-count').innerText = count + "K";
+    }, 3000);
+
+    function viewDetails(id) {
+        Swal.fire('Details for ' + id, 'Photo and description would appear here.', 'info');
+    }
+</script>
+
+<style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+</body>
+</html>

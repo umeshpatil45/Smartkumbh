@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Dashboard | KumbhVerse</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --orange: #ff6a00; --dark: #050506; --glass: rgba(255, 255, 255, 0.05); --text-gray: #b0b0b0; }
+        body { background: var(--dark); color: white; font-family: 'Poppins', sans-serif; margin: 0; display: flex; }
+
+        /* --- Sidebar Style --- */
+        .sidebar { 
+            width: 280px; background: rgba(10, 10, 12, 0.98); 
+            border-right: 1px solid rgba(255, 255, 255, 0.1); 
+            height: 100vh; position: fixed; padding: 25px;
+            overflow-y: auto; scrollbar-width: thin;
+        }
+        .sidebar-brand { color: var(--orange); font-size: 24px; font-weight: 800; margin-bottom: 40px; display: block; text-decoration: none; }
+        .nav-label { color: var(--text-gray); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 20px 0 10px 10px; }
+        .nav-link { 
+            color: white; padding: 12px 15px; border-radius: 12px; display: flex; align-items: center; 
+            transition: 0.3s; text-decoration: none; margin-bottom: 5px;
+        }
+        .nav-link i { width: 25px; font-size: 18px; margin-right: 10px; color: var(--orange); }
+        .nav-link:hover { background: var(--glass); transform: translateX(5px); color: var(--orange); }
+        .nav-link.active { background: var(--orange); color: white; }
+        .nav-link.active i { color: white; }
+
+        /* --- Main Content --- */
+        .main-content { margin-left: 280px; width: calc(100% - 280px); padding: 40px; }
+        
+        .premium-card { 
+            background: var(--glass); border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 20px; padding: 25px; transition: 0.3s; height: 100%;
+            backdrop-filter: blur(10px);
+        }
+        .premium-card:hover { border-color: var(--orange); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(255, 106, 0, 0.1); }
+        
+        .btn-premium { background: var(--orange); border: none; color: white; font-weight: 600; border-radius: 10px; transition: 0.3s; text-decoration: none; display: inline-block; text-align: center; }
+        .btn-premium:hover { background: #e65f00; color: white; transform: scale(1.02); }
+        
+        .badge-live { background: #ff0000; font-size: 10px; padding: 4px 8px; border-radius: 5px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        .talking-status { 
+            position: fixed; bottom: 20px; right: 20px; 
+            background: var(--orange); color: white; 
+            padding: 10px 20px; border-radius: 30px; 
+            box-shadow: 0 5px 15px rgba(255, 106, 0, 0.4);
+            display: flex; align-items: center; gap: 10px; z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <a href="/" class="sidebar-brand text-center">KUMBH<span class="text-white">VERSE</span></a>
+
+        <div class="nav-label">Core Features</div>
+        <a href="/user-dashboard" class="nav-link active"><i class="fas fa-th-large"></i> Dashboard</a>
+        <a href="/hotels" class="nav-link"><i class="fas fa-hotel"></i> Premium Hotels</a>
+        <a href="/wheels" class="nav-link"><i class="fas fa-car"></i> Wheels (Transport)</a>
+        <a href="/map" class="nav-link"><i class="fas fa-map-location-dot"></i> Live Nashik Map</a>
+        <a href="/ai-assistant" class="nav-link"><i class="fas fa-robot"></i> Talking AI Robot</a>
+
+        <div class="nav-label">Live Services</div>
+        <a href="/user-crowd" class="nav-link"><i class="fas fa-users-viewfinder"></i> Crowd Status</a>
+        <a href="/aarti-schedule" class="nav-link"><i class="fas fa-om"></i> Aarti Timings</a>
+        <a href="/weather-alert" class="nav-link"><i class="fas fa-cloud-sun"></i> Weather Alerts</a>
+
+        <div class="nav-label">Personal</div>
+        <a href="/profile" class="nav-link"><i class="fas fa-user-gear"></i> Profile Details</a>
+        <a href="/identity-QR" class="nav-link"><i class="fas fa-qrcode"></i> Identity QR Code</a>
+
+        <div class="mt-5">
+            <a href="/logout" class="nav-link text-danger"><i class="fas fa-right-from-bracket"></i> Logout</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="row align-items-center mb-5">
+            <div class="col">
+                <h1 class="fw-bold m-0">Welcome to the Divine, <%= user.name %>! ✨</h1>
+                <p class="text-secondary">Your Gateway to a Smart & Spiritual Kumbh Mela 2027.</p>
+            </div>
+            <div class="col-auto">
+                <a href="/identity-QR" style="text-decoration: none;">
+                    <div class="premium-card p-3 text-center" style="background: white; color: black; border-radius: 15px; min-width: 100px; cursor: pointer;">
+                        <i class="fas fa-qrcode fa-2xl"></i>
+                        <div class="mt-2 small fw-bold">E-PASS</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-7">
+                <div class="premium-card">
+                    <h5 class="text-orange mb-3"><i class="fas fa-user-circle me-2"></i>Personal Profile</h5>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <p class="small text-secondary mb-1">User Name</p>
+                            <h6 class="fw-bold"><%= user.name %></h6>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="small text-secondary mb-1">Registered Phone</p>
+                            <h6 class="fw-bold"><%= user.phone %></h6>
+                        </div>
+                    </div>
+                    <hr class="opacity-10">
+                    <div class="d-flex align-items-center text-danger">
+                        <i class="fas fa-shield-heart me-2"></i>
+                        <span class="small">Emergency SOS Contact: <b>+91 99999 00000</b></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="premium-card">
+                    <h5 class="mb-3"><span class="badge-live me-2">LIVE</span>Current Status</h5>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="text-center" style="cursor:pointer;" onclick="location.href='/user-crowd'">
+                            <i class="fas fa-users text-warning fa-lg mb-2"></i>
+                            <p class="small m-0 text-secondary">Crowd</p>
+                            <p class="fw-bold m-0">Medium</p>
+                        </div>
+                        <div class="text-center border-start border-end px-4" style="cursor:pointer;" onclick="location.href='/weather-alert'">
+                            <i class="fas fa-thermometer-half text-info fa-lg mb-2"></i>
+                            <p class="small m-0 text-secondary">Weather</p>
+                            <p class="fw-bold m-0">28°C</p>
+                        </div>
+                        <div class="text-center" style="cursor:pointer;" onclick="location.href='/aarti-schedule'">
+                            <i class="fas fa-sun text-orange fa-lg mb-2"></i>
+                            <p class="small m-0 text-secondary">Aarti</p>
+                            <p class="fw-bold m-0">06:45 PM</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <div class="premium-card border-bottom border-warning border-4">
+                    <i class="fas fa-hotel fa-2x text-orange mb-3"></i>
+                    <h4>Premium Hotels</h4>
+                    <p class="small text-secondary">Book verified stays near Ram Kund, Tapovan, and Panchvati.</p>
+                    <a href="/hotels" class="btn-premium btn-sm w-100 mt-2 p-2">Explore Hotels</a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="premium-card border-bottom border-info border-4">
+                    <i class="fas fa-car-side fa-2x text-info mb-3"></i>
+                    <h4>Wheels</h4>
+                    <p class="small text-secondary">Pre-book E-Rickshaws, Taxis, and Parking slots instantly.</p>
+                    <a href="/wheels" class="btn-premium btn-sm w-100 mt-2 p-2">Book Wheels</a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="premium-card border-bottom border-primary border-4">
+                    <i class="fas fa-map-marked-alt fa-2x text-primary mb-3"></i>
+                    <h4>Nashik Live Map</h4>
+                    <p class="small text-secondary">Real-time crowd heatmaps and navigation for Kumbh routes.</p>
+                    <a href="/map" class="btn-premium btn-sm w-100 mt-2 p-2">View Live Map</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-8">
+                <div class="premium-card">
+                    <h5 class="mb-3"><i class="fas fa-newspaper me-2 text-danger"></i>Latest Announcements</h5>
+                    <div class="list-group list-group-flush bg-transparent">
+                        <div class="list-group-item bg-transparent text-white border-secondary px-0">
+                            <span class="text-orange small fw-bold">10 MINS AGO</span>
+                            <p class="m-0 small">Special Shuttle buses started from Nashik Road Railway Station to Mela Zone.</p>
+                        </div>
+                        <div class="list-group-item bg-transparent text-white border-0 px-0">
+                            <span class="text-orange small fw-bold">1 HOUR AGO</span>
+                            <p class="m-0 small">Avoid Trimbak Road due to heavy traffic; use alternate Tapovan route.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="premium-card text-center d-flex flex-column align-items-center justify-content-center border-start border-orange border-5">
+                    <i class="fas fa-robot fa-3x text-orange mb-3"></i>
+                    <h5>Ask Kumbh AI</h5>
+                    <p class="small text-secondary">Talk to our robot for any help or navigation queries.</p>
+                    <a href="/ai-assistant" class="btn-premium w-100 p-2">Launch Robo</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="talking-status">
+        <i class="fas fa-microphone-lines"></i>
+        <span>AI Assistant: <b>Online</b></span>
+    </div>
+
+    <script>
+        // Automatic Voice Greeting
+        window.onload = () => {
+            const welcomeMsg = new SpeechSynthesisUtterance("Jai Shri Ram <%= user.name %>. Welcome to Kumbh Verse. I am your personal AI assistant. How can I help you today?");
+            window.speechSynthesis.speak(welcomeMsg);
+        };
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Route & Traffic | KumbhVerse AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root { 
+            --kumbh-orange: #ff6a00; 
+            --bg-dark: #070708; 
+            --sidebar-bg: #0d0d0f;
+            --card-glass: rgba(255, 255, 255, 0.03);
+            --border-glass: rgba(255, 255, 255, 0.08);
+        }
+        
+        body { background: var(--bg-dark); color: white; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+        
+        .sidebar { 
+            width: 260px; height: 100vh; background: var(--sidebar-bg); 
+            position: fixed; border-right: 1px solid var(--border-glass); 
+            padding: 25px 15px; z-index: 1000;
+        }
+
+        .nav-item {
+            color: rgba(255,255,255,0.5); text-decoration: none; padding: 12px 18px;
+            border-radius: 12px; margin-bottom: 5px; display: flex; align-items: center;
+            gap: 12px; transition: 0.3s; font-size: 0.95rem;
+        }
+
+        .nav-item:hover, .nav-item.active { background: rgba(255, 106, 0, 0.1); color: var(--kumbh-orange); }
+
+        .main-content { margin-left: 260px; padding: 35px; }
+
+        .module-card {
+            background: var(--card-glass); border: 1px solid var(--border-glass);
+            border-radius: 24px; padding: 25px; backdrop-filter: blur(10px); height: 100%;
+        }
+
+        .stat-value { font-size: 1.8rem; font-weight: 800; color: var(--kumbh-orange); }
+        
+        /* Interactive Map Container */
+        .map-container {
+            height: 450px; width: 100%; border-radius: 20px;
+            border: 1px solid var(--border-glass); overflow: hidden; position: relative;
+        }
+
+        .traffic-dot {
+            width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px;
+        }
+        .bg-congested { background: #ff4d4d; box-shadow: 0 0 10px #ff4d4d; }
+        .bg-smooth { background: #2ecc71; box-shadow: 0 0 10px #2ecc71; }
+        .bg-slow { background: #f1c40f; box-shadow: 0 0 10px #f1c40f; }
+
+        .route-alert {
+            border-left: 4px solid var(--kumbh-orange);
+            background: rgba(255, 106, 0, 0.05);
+            padding: 15px; border-radius: 10px; margin-bottom: 10px;
+            transition: 0.3s;
+        }
+        .route-alert.blocked { border-left-color: #ff4d4d; background: rgba(255, 77, 77, 0.05); }
+
+        .swal2-popup { background: #121214 !important; color: white !important; border-radius: 20px !important; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="d-flex align-items-center gap-2 mb-5 px-3">
+        <div style="width:30px; height:30px; background:var(--kumbh-orange); border-radius:8px;"></div>
+        <h4 class="m-0 fw-bold">KumbhVerse</h4>
+    </div>
+    
+    <nav>
+        <div class="small text-uppercase text-muted mb-3 px-3">Core Control</div>
+        <a href="/officer-dashboard" class="nav-item"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+        <a href="/officer-crowd" class="nav-item"><i class="fa-solid fa-users"></i> Crowd Control</a>
+        <a href="/officer-route" class="nav-item active"><i class="fa-solid fa-map-location-dot"></i> Route & Traffic</a>
+        
+        <div class="small text-uppercase text-muted mt-4 mb-3 px-3">Emergency</div>
+        <a href="/officer-medical-camp" class="nav-item"><i class="fa-solid fa-truck-medical"></i> Medical Camp</a>
+        <a href="/officer-missing" class="nav-item"><i class="fa-solid fa-person-circle-exclamation"></i> Missing Portal</a>
+        
+        <div class="small text-uppercase text-muted mt-4 mb-3 px-3">Operations</div>
+        <a href="/officer-seva" class="nav-item"><i class="fa-solid fa-calendar-check"></i> Seva Monitoring</a>
+        <a href="/officer-resource" class="nav-item"><i class="fa-solid fa-user-shield"></i> Resource Map</a>
+        
+        <a href="/logout" class="nav-item text-danger mt-5"><i class="fa-solid fa-power-off"></i> Logout</a>
+    </nav>
+</div>
+
+<div class="main-content">
+    <div class="d-flex justify-content-between align-items-end mb-5">
+        <div>
+            <span class="badge bg-warning text-dark mb-2">Zone: <%= assignedZone %></span>
+            <h2 class="fw-bold m-0">Route & Traffic Management</h2>
+            <p class="text-muted m-0">Live Traffic Control Unit</p>
+        </div>
+        <div class="text-end">
+            <button onclick="updateTrafficPlan()" class="btn btn-outline-warning btn-sm px-4 py-2 fw-bold">UPDATE TRAFFIC PLAN</button>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="module-card text-center">
+                <small class="text-muted">Avg. Movement Speed</small>
+                <div class="stat-value" id="speedVal">12 km/h</div>
+                <div class="text-warning small mt-2"><i class="fa-solid fa-clock"></i> Slow Traffic</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="module-card text-center">
+                <small class="text-muted">Vehicles in Zone</small>
+                <div class="stat-value">2,840</div>
+                <div class="text-success small mt-2">Within Limit</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="module-card text-center">
+                <small class="text-muted">Active Diversions</small>
+                <div class="stat-value text-info" id="diversionCount">01</div>
+                <div class="text-info small mt-2">Updated Just Now</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="module-card text-center">
+                <small class="text-muted">Parking Capacity</small>
+                <div class="stat-value text-danger">88%</div>
+                <div class="text-danger small mt-2">Almost Full</div>
+            </div>
+        </div>
+    </div>
+
+    
+
+    <div class="row g-4">
+        <div class="col-md-8">
+            <div class="module-card p-0" style="overflow: hidden;">
+                <div class="d-flex justify-content-between p-4 pb-0">
+                    <h5 class="m-0 fw-bold"><i class="fa-solid fa-map me-2 text-primary"></i>Live GPS Satellite Feed</h5>
+                    <div class="d-flex gap-3">
+                        <small><span class="traffic-dot bg-smooth"></span>Smooth</small>
+                        <small><span class="traffic-dot bg-slow"></span>Slow</small>
+                        <small><span class="traffic-dot bg-congested"></span>Heavy</small>
+                    </div>
+                </div>
+                <div class="map-container mt-3">
+                    <iframe 
+                        width="100%" 
+                        height="100%" 
+                        frameborder="0" 
+                        style="border:0; filter: invert(90%) hue-rotate(180deg) brightness(95%);" 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3748.9482565615714!2d73.7891393149163!3d20.0022363865615!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bdd9666aaaaaaab%3A0x640b615822602737!2sRam%20Kund!5e0!3m2!1sen!2sin!4v1625000000000!5m2!1sen!2sin&layer=t" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="module-card mb-4">
+                <h6 class="fw-bold mb-3"><i class="fa-solid fa-road me-2 text-warning"></i>Diversion Control</h6>
+                
+                <div class="route-alert blocked" id="route1">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-bold small">Gate 3 -> Ram Ghat</div>
+                            <small class="status-text text-danger">Status: Blocked</small>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" onchange="toggleRoute('route1', this)" checked>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="route-alert" id="route2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-bold small">Panchavati Inner Road</div>
+                            <small class="status-text text-success">Status: Open</small>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" onchange="toggleRoute('route2', this)">
+                        </div>
+                    </div>
+                </div>
+                <button onclick="broadcastAlert()" class="btn btn-warning w-100 btn-sm mt-2 py-2 fw-bold">BROADCAST TO PILGRIMS</button>
+            </div>
+
+            <div class="module-card">
+                <h6 class="fw-bold mb-3"><i class="fa-solid fa-square-p me-2 text-info"></i>Parking Status</h6>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span>P1 - Sadhugram</span>
+                        <span class="text-danger">95%</span>
+                    </div>
+                    <div class="progress" style="height: 6px; background: rgba(255,255,255,0.1);">
+                        <div class="progress-bar bg-danger" style="width: 95%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span>P2 - Outer Ring Road</span>
+                        <span class="text-success">40%</span>
+                    </div>
+                    <div class="progress" style="height: 6px; background: rgba(255,255,255,0.1);">
+                        <div class="progress-bar bg-success" style="width: 40%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. Working: Toggle Route Status
+    function toggleRoute(routeId, checkbox) {
+        const routeElement = document.getElementById(routeId);
+        const statusText = routeElement.querySelector('.status-text');
+        const countElement = document.getElementById('diversionCount');
+        
+        if (checkbox.checked) {
+            routeElement.classList.add('blocked');
+            statusText.innerText = 'Status: Blocked';
+            statusText.className = 'status-text text-danger';
+        } else {
+            routeElement.classList.remove('blocked');
+            statusText.innerText = 'Status: Open';
+            statusText.className = 'status-text text-success';
+        }
+
+        // Update Diversion Count Statistically
+        let currentBlocked = document.querySelectorAll('.route-alert.blocked').length;
+        countElement.innerText = currentBlocked.toString().padStart(2, '0');
+    }
+
+    // 2. Working: Broadcast Alert
+    function broadcastAlert() {
+        Swal.fire({
+            title: 'Broadcast Traffic Update?',
+            text: "This will send notifications to all Pilgrim Apps and Digital Signages.",
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonColor: '#ff6a00',
+            confirmButtonText: 'Yes, Broadcast!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire('Success!', 'Route updates have been broadcasted.', 'success');
+            }
+        });
+    }
+
+    // 3. Working: Update Traffic Plan
+    function updateTrafficPlan() {
+        Swal.fire({
+            title: 'Updating Live Plan...',
+            html: 'Syncing with GPS Satellite and local officers.',
+            timer: 2000,
+            timerProgressBar: true,
+            didOpen: () => { Swal.showLoading() }
+        }).then(() => {
+            const speed = Math.floor(Math.random() * (25 - 5 + 1)) + 5;
+            document.getElementById('speedVal').innerText = speed + " km/h";
+            Swal.fire('Plan Updated', 'Average speed recalculated based on live feed.', 'success');
+        });
+    }
+</script>
+
+</body>
+</html>

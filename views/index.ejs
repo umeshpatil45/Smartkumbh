@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KumbhVerse | Nashik 2027 AI Portal</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        :root { --kumbh-orange: #ff6a00; --kumbh-gold: #ffb400; --bg-dark: #050506; }
+        
+        body { 
+            background: var(--bg-dark); color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .hero-viewport {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('images/background.png'); 
+            background-size: cover; background-position: center;
+        }
+        
+        .mesh-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 106, 0, 0.1) 0%, rgba(5, 5, 6, 0.95) 80%);
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px; padding: 30px; cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative; overflow: hidden; height: 100%;
+        }
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.08); transform: translateY(-10px);
+            border-color: var(--kumbh-orange);
+        }
+
+        .side-dock {
+            position: fixed; right: 20px; top: 50%; transform: translateY(-50%);
+            display: flex; flex-direction: column; gap: 15px; z-index: 1000;
+        }
+        .dock-item {
+            width: 50px; height: 50px; background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            color: white; transition: 0.3s; text-decoration: none;
+        }
+        .dock-item:hover { background: var(--kumbh-orange); color: white; transform: scale(1.1); }
+
+        .user-pill {
+            background: rgba(255, 106, 0, 0.15); border: 1px solid var(--kumbh-orange);
+            padding: 5px 15px; border-radius: 50px; display: flex; align-items: center; gap: 10px;
+        }
+
+       /* Modern Footer Styling */
+        .main-footer {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 80px 0 30px;
+            margin-top: 100px;
+            position: relative;
+        }
+
+        .footer-logo-text {
+            font-size: 1.8rem;
+            letter-spacing: 2px;
+        }
+
+        .footer-heading {
+            color: var(--kumbh-orange);
+            font-weight: 700;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            font-size: 1.1rem;
+        }
+
+        .footer-links-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-links-list li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links-list a {
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .footer-links-list a:hover {
+            color: var(--kumbh-gold);
+            transform: translateX(8px);
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            transition: 0.4s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .social-btn:hover {
+            background: var(--kumbh-orange);
+            color: white;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(255, 106, 0, 0.4);
+        }
+
+        .newsletter-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .back-to-top {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 50px;
+            background: var(--kumbh-orange);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 0 20px rgba(255, 106, 0, 0.5);
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .back-to-top:hover {
+            background: var(--kumbh-gold);
+            transform: translateX(-50%) translateY(-5px);
+        }
+        #live-toast {
+            position: fixed; bottom: 30px; left: 30px; z-index: 2000;
+            background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(15px);
+            border-left: 5px solid var(--kumbh-orange); border-radius: 10px;
+            padding: 15px 25px; transform: translateX(-150%); transition: 0.5s ease;
+        }
+        #live-toast.show { transform: translateX(0); }
+
+        .btn-warning { background: var(--kumbh-orange); border: none; color: white; }
+        .btn-warning:hover { background: var(--kumbh-gold); color: black; }
+
+        .modal-content {
+            background: #111; color: white;
+            border: 1px solid var(--kumbh-orange); border-radius: 20px;
+        }
+        .form-control {
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1);
+            color: white !important;
+        }
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+    </style>
+</head>
+<body>
+
+    <div class="hero-viewport"></div>
+    <div class="mesh-overlay"></div>
+
+    <div class="side-dock">
+        <a href="javascript:void(0)" onclick="handleNav('Accessing Live Navigation Map...')" class="dock-item" title="Map"><i class="fa-solid fa-map-location-dot"></i></a>
+        <a href="tel:108" class="dock-item text-danger" title="Emergency"><i class="fa-solid fa-phone-flip"></i></a>
+       <a href="/robo" class="dock-item" title="AI Assistant">
+    <i class="fa-solid fa-robot"></i>
+</a>
+    </div>
+
+
+
+    <nav class="navbar navbar-expand-lg py-4">
+        <div class="container">
+            <div class="navbar-brand d-flex align-items-center gap-2" style="cursor: pointer;">
+                <a href="/admin-login" style="text-decoration: none;" title="Admin Portal">
+                    <div style="width: 40px; height: 40px; background: var(--kumbh-orange); border-radius: 10px;" class="d-flex align-items-center justify-content-center">
+                        <b class="text-white">K</b>
+                    </div>
+                </a>
+                <span class="fw-bold fs-4 text-white" onclick="window.location.reload()">SMART<span class="opacity-50">KUMBH</span></span>
+            </div>
+
+            <div class="ms-auto d-flex align-items-center gap-3" id="auth-section">
+             
+                
+                <a href="/user-login" class="btn btn-link text-white text-decoration-none d-none d-md-block">USER LOGIN</a>
+                <a href="/user-register" class="btn btn-warning rounded-pill px-4 shadow-sm">REGISTER</a>
+    
+    <div class="vr mx-2 text-white opacity-25"></div>
+                <a href="/officers-login" class="btn btn-outline-warning rounded-pill px-4">
+                    <i class="fa-solid fa-user-shield me-2"></i>OFFICER LOGIN
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="row min-vh-75 align-items-center py-5">
+            <div class="col-lg-7">
+                <span class="badge rounded-pill bg-light text-dark px-3 py-2 mb-3">AI-POWERED SMART PORTAL</span>
+                <h1 class="display-2 fw-bold mb-4">REVOLUTIONIZING <br><span style="color:var(--kumbh-orange)">KUMBH 2027.</span></h1>
+                <p class="lead opacity-75 mb-5">Nashik's official digital companion for the 2027 Kumbh Mela. Real-time updates on crowd, water quality, and safe stay.</p>
+                <div class="d-flex gap-3">
+                    <button class="btn btn-warning btn-lg rounded-pill px-5 shadow" onclick="handleNav('Exploring KumbhVerse...')">EXPLORE NOW</button>
+                    <button class="btn btn-outline-light btn-lg rounded-pill px-4" onclick="handleNav('Loading Official Guidebook...')">GUIDEBOOK</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-5">
+            <div class="col-md-3">
+                <div class="feature-card" onclick="handleNav('Analyzing High-Density Zones...')">
+                    <i class="fa-solid fa-users text-warning fs-1 mb-3"></i>
+                    <h5>Crowd Control</h5>
+                    <p class="small opacity-50">Real-time density analysis</p>
+                    <h3 class="m-0" id="crowd-count">94.2K <small class="fs-6 text-success">Active</small></h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="feature-card" onclick="handleNav('Fetching Water Sensor Data...')">
+                    <i class="fa-solid fa-droplet text-info fs-1 mb-3"></i>
+                    <h5>Water Quality</h5>
+                    <p class="small opacity-50">Godavari River Sensors</p>
+                    <h3 class="m-0">7.2 PH <small class="fs-6 text-warning">Healthy</small></h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="feature-card" onclick="handleNav('Checking Accommodation Availability...')">
+                    <i class="fa-solid fa-bed text-danger fs-1 mb-3"></i>
+                    <h5>Accommodation</h5>
+                    <p class="small opacity-50">Available Niwas/Hotels</p>
+                    <h3 class="m-0">1,240 <small class="fs-6">Left</small></h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="feature-card" onclick="handleNav('Locating Smart Parking Slots...')">
+                    <i class="fa-solid fa-parking text-primary fs-1 mb-3"></i>
+                    <h5>Smart Parking</h5>
+                    <p class="small opacity-50">Slot availability index</p>
+                    <h3 class="m-0">78% <small class="fs-6">Full</small></h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-5 pt-5" id="map">
+            <div class="feature-card p-0 overflow-hidden">
+                <div class="row g-0">
+                    <div class="col-md-4 p-5 d-flex flex-column justify-content-center">
+                        <h2 class="fw-bold mb-3">LIVE SYNC MAP</h2>
+                        <p class="opacity-75">Navigate Nashik with real-time traffic updates, Ghat locations, and emergency zones.</p>
+                        <button class="btn btn-outline-warning rounded-pill mt-3" onclick="handleNav('Expanding Interactive Map...')">EXPAND MAP</button>
+                    </div>
+                    <div class="col-md-8 position-relative bg-dark" style="min-height: 400px;">
+                        <div class="position-absolute top-50 start-50 translate-middle text-center" style="z-index: 2;">
+                            <div class="spinner-grow text-warning mb-3"></div>
+                            <p class="fw-bold">SYNCING LIVE SATELLITE DATA...</p>
+                        </div>
+                        <div style="background: url('images/map-real.avif'); width: 100%; height: 100%; background-size: cover; opacity: 0.3;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+  <footer class="main-footer">
+        <div class="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+            <i class="fa-solid fa-chevron-up"></i>
+        </div>
+        
+        <div class="container">
+            <div class="row g-5">
+                <div class="col-lg-4 col-md-6">
+                    <div class="footer-logo-text fw-bold mb-3">
+                        <span style="color: white;">KUMBH</span><span style="color: var(--kumbh-orange);">VERSE</span>
+                    </div>
+                    <p class="opacity-50 mb-4">
+                        Revolutionizing the spiritual experience with AI. Providing real-time insights for a safer and smarter Nashik Kumbh Mela 2027.
+                    </p>
+                    <div class="social-icons">
+                        <a href="#" class="social-btn"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="#" class="social-btn"><i class="fa-brands fa-x-twitter"></i></a>
+                        <a href="#" class="social-btn"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#" class="social-btn"><i class="fa-brands fa-youtube"></i></a>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-6">
+                    <h5 class="footer-heading">Navigation</h5>
+                    <ul class="footer-links-list">
+                        <li><a href="#">Home</a></li>
+                        <li><a href="#map">Live Map</a></li>
+                        <li><a href="#">Shahi Snan Dates</a></li>
+                        <li><a href="#">Official Guide</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <h5 class="footer-heading">Emergency</h5>
+                    <ul class="footer-links-list">
+                        <li><a href="tel:108"><i class="fa-solid fa-phone me-2 text-danger"></i>Ambulance: 108</a></li>
+                        <li><a href="tel:100"><i class="fa-solid fa-shield-halved me-2 text-primary"></i>Police: 100</a></li>
+                        <li><a href="tel:101"><i class="fa-solid fa-fire-extinguisher me-2 text-warning"></i>Fire Brigade: 101</a></li>
+                        <li><a href="#"><i class="fa-solid fa-hospital me-2 text-success"></i>Nearby Hospitals</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <h5 class="footer-heading">Stay Updated</h5>
+                    <div class="newsletter-box">
+                        <p class="small opacity-50 mb-3">Subscribe for live alerts and festival updates.</p>
+                        <div class="input-group">
+                            <input type="email" class="form-control bg-transparent border-secondary text-white" placeholder="Email Address">
+                            <button class="btn btn-warning"><i class="fa-solid fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-5 opacity-10">
+            
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="small opacity-50 mb-0">&copy; 2026-27 SMARTKHUMBH Nashik Authority. Built By Umesh & Pritam </p>
+                </div>
+                <div class="col-md-6 text-center text-md-end mt-3 mt-md-0">
+                    <a href="#" class="text-white opacity-50 text-decoration-none small me-4">Privacy Policy</a>
+                    <a href="#" class="text-white opacity-50 text-decoration-none small">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <div id="live-toast">
+        <div class="d-flex align-items-center gap-3">
+            <div class="spinner-border spinner-border-sm text-warning"></div>
+            <div>
+                <small class="text-warning fw-bold d-block">LIVE ALERT</small>
+                <span id="toast-msg" class="small">Connecting to Server...</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Navigation Simulation with SweetAlert
+        function handleNav(msg) {
+            Swal.fire({
+                title: 'KumbhVerse 2027',
+                html: `<div class="text-center"><div class="spinner-border text-warning mb-3"></div><p>${msg}</p></div>`,
+                timer: 1500,
+                timerProgressBar: true,
+                background: '#111',
+                color: '#fff',
+                showConfirmButton: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+        }
+
+        // Registration Logic
+        document.getElementById('registerForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const phone = document.getElementById('regPhone').value;
+            const name = document.getElementById('regName').value;
+            const pass = document.getElementById('regPass').value;
+
+            if(localStorage.getItem(phone)) {
+                Swal.fire('Error', 'Account already exists!', 'error');
+            } else {
+                localStorage.setItem(phone, JSON.stringify({ name: name, pass: pass }));
+                Swal.fire('Success', 'Account created successfully!', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('userRegisterModal')).hide();
+            }
+        });
+
+        // Login Logic & UI Update
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const phone = document.getElementById('loginId').value;
+            const inputPass = document.getElementById('loginPass').value;
+            const user = JSON.parse(localStorage.getItem(phone));
+
+            if(user && user.pass === inputPass) {
+                Swal.fire('Welcome', 'Greetings, ' + user.name, 'success');
+                updateDashboardUI(user.name);
+                bootstrap.Modal.getInstance(document.getElementById('userLoginModal')).hide();
+            } else {
+                Swal.fire('Error', 'Invalid credentials!', 'error');
+            }
+        });
+
+        // Function to show User Pill instead of Login buttons
+        function updateDashboardUI(name) {
+            const authSection = document.getElementById('auth-section');
+            authSection.innerHTML = `
+                <div class="dropdown">
+                    <div class="user-pill dropdown-toggle" role="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false" style="cursor:pointer">
+                        <i class="fa-solid fa-circle-user text-warning fs-5"></i>
+                        <span class="fw-bold text-white small">${name.toUpperCase()}</span>
+                    </div>
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark" style="border: 1px solid var(--kumbh-orange); background: #111;">
+                        <li><a class="dropdown-item" href="#">My Profile</a></li>
+                        <li><hr class="dropdown-divider opacity-25"></li>
+                        <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="location.reload()">Logout</a></li>
+                    </ul>
+                </div>
+            `;
+        }
+
+        // Live Crowd Update Simulation
+        function updateLiveStats() {
+            const crowdEl = document.getElementById('crowd-count');
+            let count = 94.2;
+            setInterval(() => {
+                count += (Math.random() * 0.1);
+                if(crowdEl) crowdEl.innerHTML = `${count.toFixed(1)}K <small class="fs-6 text-success">Active</small>`;
+            }, 5000);
+        }
+
+        // Live Alerts Logic
+        const toast = document.getElementById('live-toast');
+        const toastMsg = document.getElementById('toast-msg');
+        let messages = [
+            "Ramkund: Moderate Crowds", 
+            "Parking Tapovan: 20 Slots Left", 
+            "Weather: 24°C Clear Sky",
+            "Next Aarti: 6:30 PM at Ghat"
+        ];
+        let index = 0;
+        function showToast() {
+            if(toastMsg) toastMsg.innerText = messages[index];
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+                index = (index + 1) % messages.length;
+            }, 4000);
+        }
+
+       // AI Assistant Toggle Logic
+const aiBtn = document.getElementById('ai-btn');
+const aiContainer = document.getElementById('ai-container');
+
+aiBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (aiContainer.style.display === 'none') {
+        aiContainer.style.display = 'block';
+        // थोडं अ‍ॅनिमेशन देण्यासाठी
+        aiContainer.style.animation = 'fadeInUp 0.5s ease forwards';
+    } else {
+        aiContainer.style.display = 'none';
+    }
+});
+
+
+
+        window.onload = () => {
+            updateLiveStats();
+            setInterval(showToast, 7000);
+            showToast();
+        };
+    </script>
+</body>
+</html>

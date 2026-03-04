@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>100+ Stays in Nashik | KumbhVerse</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --orange: #ff6a00; --dark: #050506; --glass: rgba(255, 255, 255, 0.05); --border: rgba(255, 255, 255, 0.1); }
+        body { background: var(--dark); color: white; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+        
+        body::before {
+            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 50% -20%, #3a1a00, transparent); z-index: -1;
+        }
+
+        .sticky-tools { position: sticky; top: 0; z-index: 1000; background: rgba(5, 5, 6, 0.9); backdrop-filter: blur(15px); padding: 15px 0; border-bottom: 1px solid var(--border); }
+        .search-container { position: relative; max-width: 600px; margin: 0 auto; }
+        .search-container input { 
+            background: var(--glass); border: 1px solid var(--border); border-radius: 50px; 
+            padding: 12px 20px 12px 50px; color: white; width: 100%; transition: 0.3s;
+        }
+        .search-container input:focus { outline: none; border-color: var(--orange); box-shadow: 0 0 20px rgba(255, 106, 0, 0.2); }
+        .search-container i { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--orange); }
+
+        /* Range Slider Styling */
+        .price-filter-container { max-width: 500px; margin: 15px auto 0; padding: 0 15px; }
+        .range-label { font-size: 0.75rem; color: #aaa; margin-bottom: 5px; display: flex; justify-content: space-between; }
+        .form-range::-webkit-slider-runnable-track { background: var(--glass); border-radius: 10px; height: 6px; }
+        .form-range::-webkit-slider-thumb { background: var(--orange); border: none; box-shadow: 0 0 10px var(--orange); }
+
+        .filter-pills { display: flex; gap: 8px; justify-content: center; margin-top: 12px; overflow-x: auto; padding: 5px; scrollbar-width: none; }
+        .pill { 
+            background: var(--glass); border: 1px solid var(--border); color: #ccc; 
+            padding: 6px 18px; border-radius: 50px; cursor: pointer; white-space: nowrap; transition: 0.3s; font-size: 0.8rem;
+        }
+        .pill.active { background: var(--orange); color: white; border-color: var(--orange); font-weight: 600; }
+
+        /* Hotel Cards */
+        .hotel-card { 
+            background: var(--glass); border-radius: 20px; overflow: hidden; 
+            border: 1px solid var(--border); transition: 0.4s; height: 100%;
+        }
+        .hotel-card:hover { transform: translateY(-8px); border-color: var(--orange); }
+        .hotel-img { height: 180px; background-size: cover; background-position: center; position: relative; }
+        
+        .badge-cat { position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.7); padding: 3px 10px; border-radius: 50px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.2); }
+        .price-tag { position: absolute; bottom: 12px; right: 12px; background: var(--orange); padding: 4px 12px; border-radius: 8px; font-weight: 800; font-size: 0.85rem; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        
+        .card-body { padding: 15px; }
+        .hotel-title { font-size: 1rem; font-weight: 700; margin-bottom: 4px; color: #fff; line-height: 1.2; }
+        .loc-text { font-size: 0.75rem; color: #aaa; display: flex; align-items: center; gap: 4px; }
+        .btn-book { 
+            background: transparent; border: 1px solid var(--orange); color: var(--orange); 
+            width: 100%; border-radius: 10px; padding: 8px; font-weight: 700; margin-top: 12px; transition: 0.3s; font-size: 0.85rem;
+        }
+        .btn-book:hover { background: var(--orange); color: white; }
+
+        .results-count { font-size: 0.85rem; color: var(--orange); text-align: center; margin-bottom: 15px; opacity: 0.8; }
+
+        /* Modal & Success Toast */
+        .modal-content { background: #121212; border: 1px solid var(--border); border-radius: 25px; color: white; }
+        .modal-header { border-bottom: 1px solid var(--border); }
+        .form-control { background: var(--glass); border: 1px solid var(--border); color: white; border-radius: 12px; }
+        .form-control:focus { background: rgba(255,255,255,0.1); color: white; border-color: var(--orange); box-shadow: none; }
+
+        #successToast {
+            position: fixed; top: 20px; right: -400px; background: #1a1a1a; 
+            border-left: 5px solid #28a745; padding: 15px 25px; border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 9999; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; align-items: center; gap: 15px;
+        }
+        #successToast.show { right: 20px; }
+    </style>
+</head>
+<body>
+
+    <div id="successToast">
+        <i class="fas fa-check-circle" style="color: #28a745; font-size: 1.5rem;"></i>
+        <div>
+            <div class="fw-bold">Request Sent!</div>
+            <div class="small opacity-50">Opening WhatsApp for confirmation...</div>
+        </div>
+    </div>
+
+    <div class="container pt-4 pb-2">
+        <div class="d-flex justify-content-between align-items-center">
+            <a href="/user-dashboard" class="text-white text-decoration-none opacity-75 small"><i class="fas fa-arrow-left me-1"></i> Dashboard</a>
+            <div class="text-end">
+                <h2 class="fw-bold m-0">Nashik <span style="color:var(--orange)">Stays</span></h2>
+                <p class="small opacity-50 mb-0">Explore 100+ Handpicked Options</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="sticky-tools">
+        <div class="container">
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search Hotels, Ashrams or Areas...">
+            </div>
+
+            <div class="price-filter-container">
+                <div class="range-label">
+                    <span>Budget Range</span>
+                    <span class="fw-bold text-white">Up to ₹<span id="priceVal">15,000</span></span>
+                </div>
+                <input type="range" class="form-range" id="priceRange" min="300" max="15000" step="100" value="15000">
+            </div>
+
+            <div class="filter-pills" id="filterContainer">
+                <div class="pill active" data-filter="all">All Stays</div>
+                <div class="pill" data-filter="luxury">Luxury</div>
+                <div class="pill" data-filter="mid">Mid-Range</div>
+                <div class="pill" data-filter="budget">Budget</div>
+                <div class="pill" data-filter="ashram">Dharamshala</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-4">
+        <div class="results-count" id="resultCount">Loading stays...</div>
+        <div class="row g-3" id="hotelGrid"></div>
+    </div>
+
+    <div class="modal fade" id="bookingModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold" id="modalHotelName">Book Stay</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="bookingForm">
+                        <div class="mb-3">
+                            <label class="small opacity-75 mb-1">Full Name</label>
+                            <input type="text" id="userName" class="form-control" placeholder="John Doe" required>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label class="small opacity-75 mb-1">Check-in</label>
+                                <input type="date" id="checkInDate" class="form-control" required>
+                            </div>
+                            <div class="col">
+                                <label class="small opacity-75 mb-1">Contact No.</label>
+                                <input type="tel" id="userPhone" class="form-control" placeholder="9876..." required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-book py-2 border-0" style="background: var(--orange); color: white;">PROCEED TO CONFIRM</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const imgStock = {
+            luxury: ["images/Luxury.jpg", "images/Luxury1.jpg", "images/Luxury2.jpg", "images/Luxury3.jpg"],
+            mid: ["images/Mid-Range.jpg", "images/Mid-Range1.jpg", "images/The Gateway Hotel (Taj).jpg", "images/Courtyard by Marriott.jpg"],
+            ashram: ["images/Dharamshala.jpg", "images/Dharamshala1.jpg", "images/Dharamshala2.jpg", "images/Dharamshala3.jpg"],
+            budget: ["images/Budget.jpg", "images/Budget1.jpg", "images/hotelsimg.avif", "images/hotels.avif"]
+        };
+
+        const stayNames = [
+            { n: "Radisson Blu Resort", c: "luxury", p: "12500", l: "Pathardi Phata" },
+            { n: "Taj Gateway Nashik", c: "luxury", p: "10200", l: "Ambad" },
+            { n: "Grape County Resort", c: "luxury", p: "14000", l: "Anjaneri" },
+            { n: "Gajanan Maharaj Ashram", c: "ashram", p: "500", l: "Panchvati" },
+            { n: "Ibis Smart Hotel", c: "mid", p: "4200", l: "Trimbak Rd" },
+            { n: "Swami Samarth Bhakt Niwas", c: "ashram", p: "400", l: "Trimbakeshwar" },
+            { n: "Express Inn Luxury", c: "luxury", p: "8500", l: "Mumbai-Agra Highway" },
+            { n: "Hotel Grand Rio", c: "mid", p: "5100", l: "Lekha Nagar" },
+            { n: "ISKCON Guest House", c: "ashram", p: "1200", l: "Vrindavan Colony" },
+            { n: "Hotel Panchvati Elite", c: "mid", p: "3500", l: "CBS Area" },
+            { n: "Hotel Pooja International", c: "budget", p: "1500", l: "Main Road" },
+            { n: "Nilgiri Baug Guest House", c: "budget", p: "900", l: "Tapovan" },
+            { n: "Hotel Sai Vijay", c: "budget", p: "1100", l: "Dwarka Circle" }
+        ];
+
+        const stays = [];
+        for (let i = 0; i < 110; i++) {
+            const base = stayNames[i % stayNames.length];
+            stays.push({
+                id: i,
+                name: i < stayNames.length ? base.n : `${base.n} - Tower ${Math.ceil(i/10)}`,
+                price: i < stayNames.length ? parseInt(base.p) : (parseInt(base.p) + (i*10)),
+                loc: base.l, cat: base.c,
+                img: `${imgStock[base.c][i % 4]}?sig=${i}`
+            });
+        }
+
+        const grid = document.getElementById('hotelGrid');
+        const search = document.getElementById('searchInput');
+        const priceRange = document.getElementById('priceRange');
+        const priceVal = document.getElementById('priceVal');
+
+        function openBookingModal(hotelName) {
+            document.getElementById('modalHotelName').innerText = hotelName;
+            new bootstrap.Modal(document.getElementById('bookingModal')).show();
+        }
+
+        function render() {
+            const filter = document.querySelector('.pill.active').dataset.filter;
+            const keyword = search.value.toLowerCase();
+            const maxPrice = parseInt(priceRange.value);
+            priceVal.innerText = maxPrice.toLocaleString();
+
+            let filtered = stays.filter(s => {
+                const matchesCat = (filter === 'all' || s.cat === filter);
+                const matchesKey = (s.name.toLowerCase().includes(keyword) || s.loc.toLowerCase().includes(keyword));
+                const matchesPrice = s.price <= maxPrice;
+                return matchesCat && matchesKey && matchesPrice;
+            });
+            
+            document.getElementById('resultCount').innerText = `Found ${filtered.length} stay options in Nashik`;
+            grid.innerHTML = filtered.map(s => `
+                <div class="col-lg-3 col-md-4 col-6">
+                    <div class="hotel-card">
+                        <div class="hotel-img" style="background-image: url('${s.img}');">
+                            <span class="badge-cat">${s.cat}</span>
+                            <span class="price-tag">₹${s.price.toLocaleString()}</span>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="hotel-title text-truncate">${s.name}</h6>
+                            <div class="loc-text small opacity-50"><i class="fas fa-map-marker-alt"></i> ${s.loc}</div>
+                            <button class="btn btn-book" onclick="openBookingModal('${s.name}')">Book Now</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        search.addEventListener('input', render);
+        priceRange.addEventListener('input', render);
+        document.querySelectorAll('.pill').forEach(p => p.addEventListener('click', function() {
+            document.querySelectorAll('.pill').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            render();
+        }));
+
+        document.getElementById('bookingForm').onsubmit = function(e) {
+            e.preventDefault();
+            const hotel = document.getElementById('modalHotelName').innerText;
+            const name = document.getElementById('userName').value;
+            const date = document.getElementById('checkInDate').value;
+            const phone = document.getElementById('userPhone').value;
+
+            bootstrap.Modal.getInstance(document.getElementById('bookingModal')).hide();
+            const toast = document.getElementById('successToast');
+            toast.classList.add('show');
+
+            const adminPhone = "918459146033"; 
+            const msg = `Hello KumbhVerse! I want to book:%0A🏨 Hotel: ${hotel}%0A👤 Name: ${name}%0A📅 Date: ${date}%0A📞 Contact: ${phone}`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                window.open(`https://wa.me/${adminPhone}?text=${msg}`, '_blank');
+            }, 2500);
+        };
+
+        render();
+    </script>
+</body>
+</html>

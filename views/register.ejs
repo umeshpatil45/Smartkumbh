@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Officer Registration | KumbhVerse</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background: #0a0a0c; color: white; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Inter', sans-serif; }
+        .reg-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); padding: 40px; border-radius: 25px; width: 100%; max-width: 450px; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .form-control, .form-select { background: rgba(0,0,0,0.5) !important; border: 1px solid #333 !important; color: white !important; border-radius: 10px; padding: 12px; margin-bottom: 15px; }
+        .btn-reg { background: linear-gradient(45deg, #ff6a00, #ff9d00); border: none; font-weight: bold; width: 100%; padding: 12px; border-radius: 10px; color: white; text-transform: uppercase; }
+        .btn-reg:hover { opacity: 0.9; transform: translateY(-1px); }
+    </style>
+</head>
+<body>
+    <div class="reg-card">
+        <div class="text-center mb-4">
+            <i class="fa-solid fa-id-card-clip text-warning display-6"></i>
+            <h3 class="mt-2 fw-bold">Officer Enrollment</h3>
+            <p class="text-white-50 small">Nashik Kumbh Mela 2027 Security Grid</p>
+        </div>
+
+        <% if (typeof error !== 'undefined') { %>
+            <div class="alert alert-danger py-2 small" style="background: rgba(255,0,0,0.1); border: 1px solid red; color: #ff8888;">
+                <i class="fa-solid fa-circle-exclamation me-2"></i> <%= error %>
+            </div>
+        <% } %>
+
+        <form action="/register" method="POST">
+            <input type="text" name="name" class="form-control" placeholder="Full Name (As per Service Record)" required>
+            <input type="text" name="accessId" class="form-control" placeholder="Service ID / Access ID" required>
+            
+            <select name="department" class="form-select" required>
+                <option value="" disabled selected>Select Department</option>
+                <option value="Police">Nashik City Police</option>
+                <option value="Traffic">Traffic Control Branch</option>
+                <option value="Medical">Health & Medical Services</option>
+                <option value="Admin">District Administration</option>
+            </select>
+
+            <input type="password" name="password" class="form-control" placeholder="Set 6-Digit Security PIN" required>
+            
+            <button type="submit" class="btn-reg">Register & Request Access</button>
+        </form>
+
+        <div class="text-center mt-4">
+            <p class="small text-white-50">Already have an account? <a href="/officers-login" class="text-warning text-decoration-none fw-bold">Login</a></p>
+        </div>
+    </div>
+</body>
+</html>

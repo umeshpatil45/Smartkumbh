@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Identity | Nashik Verse</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+    <style>
+        :root { --primary: #00e676; --bg: #050a0e; }
+        body { margin: 0; background: var(--bg); color: white; font-family: 'Poppins', sans-serif; overflow-x: hidden; }
+        .bg-glow { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 50% 50%, #004d40 0%, #050a0e 100%); z-index: -1; opacity: 0.5; }
+        .header { padding: 30px; text-align: center; background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(0,230,118,0.2); backdrop-filter: blur(10px); }
+        .qr-card { background: white; width: 130px; height: 130px; margin: -30px auto 20px; padding: 10px; border-radius: 20px; border: 4px solid var(--primary); box-shadow: 0 0 20px rgba(0, 230, 118, 0.4); }
+        .scanner-container { position: relative; width: 90%; max-width: 400px; margin: 20px auto; border-radius: 30px; overflow: hidden; border: 2px solid rgba(255,255,255,0.1); background: #000; }
+        #video { width: 100%; display: block; }
+        canvas { position: absolute; top: 0; left: 0; z-index: 5; }
+        .scan-line { position: absolute; width: 100%; height: 4px; background: var(--primary); top: 0; left: 0; z-index: 10; box-shadow: 0 0 15px var(--primary); animation: scan 3s linear infinite; }
+        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
+
+        #info-form { display: none; width: 90%; max-width: 400px; margin: 20px auto; background: rgba(255, 255, 255, 0.05); padding: 25px; border-radius: 30px; backdrop-filter: blur(20px); border: 1px solid var(--primary); animation: slideUp 0.5s ease-out; }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .input-group { text-align: left; margin-bottom: 15px; }
+        .input-group label { font-size: 0.8rem; color: var(--primary); }
+        .input-group input { width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2); padding: 12px; border-radius: 12px; color: white; margin-top: 5px; box-sizing: border-box; }
+        .btn-cyber { width: 100%; padding: 15px; border-radius: 15px; border: none; background: var(--primary); color: black; font-weight: bold; cursor: pointer; }
+        #status-pill { display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 0.7rem; background: rgba(255,255,255,0.1); margin: 10px; }
+    </style>
+</head>
+<body>
+    <div class="bg-glow"></div>
+    <div class="header">
+        <h2 style="margin:0;">NASHIK VERSE ID</h2>
+        <div id="status-pill">Initializing AI Systems...</div>
+    </div>
+
+    <div class="qr-card" id="qrcode"></div>
+
+    <div class="scanner-container" id="cam-box">
+        <video id="video" autoplay muted playsinline></video>
+        <div class="scan-line"></div>
+    </div>
+<button onclick="showForm()" style="position:fixed; top:10px; right:10px; z-index:9999;">
+   DEBUG: Force Show Form
+</button>
+    <div id="info-form">
+        <h3 style="margin:0; color:var(--primary);">Face Verified!</h3>
+        <p style="font-size: 0.75rem; opacity: 0.8;">Enter your group details below:</p>
+        
+        <div class="input-group">
+            <label>Full Name</label>
+            <input type="text" id="leader-name" placeholder="Who is the group leader?">
+        </div>
+        <div class="input-group">
+            <label>Purpose of Visit</label>
+            <input type="text" id="visit-reason" placeholder="e.g. Tourism, Kumbh Mela">
+        </div>
+        <div style="background: rgba(0,230,118,0.1); padding: 10px; border-radius: 10px; margin-bottom: 20px;">
+            <span style="font-size: 0.8rem;">Detected: <b id="detect-val">0</b> Person(s)</span>
+        </div>
+        <button class="btn-cyber" onclick="finalSync()">SYNC TO DATABASE</button>
+    </div>
+
+  <script>
+    const video = document.getElementById('video');
+    const infoForm = document.getElementById('info-form');
+    const statusPill = document.getElementById('status-pill');
+    let faceDetectedOnce = false;
+
+    // 1. Generate QR
+    new QRCode(document.getElementById("qrcode"), { text: "NV-8892-UX", width: 120, height: 120 });
+
+    async function initAI() {
+    // This now points to YOUR local server folder
+    const MODEL_URL = '/models'; 
+    
+    try {
+        statusPill.innerText = "Loading Local AI Models...";
+        
+        // Loading from local path
+        await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+        
+        statusPill.innerHTML = "<span style='color:#00e676'>● SYSTEM OFFLINE-READY</span>";
+        startCamera();
+    } catch (e) {
+        console.error("Model Load Error:", e);
+        statusPill.innerText = "Local Model Error! Showing Form...";
+        showForm(); // Fail-safe
+    }
+}
+
+    function startCamera() {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+            .then(s => { video.srcObject = s; })
+            .catch(e => { 
+                statusPill.innerText = "Camera Denied. Please enable it.";
+                showForm(); 
+            });
+    }
+
+    video.addEventListener('play', () => {
+        const canvas = faceapi.createCanvasFromMedia(video);
+        document.getElementById('cam-box').append(canvas);
+        
+        // Match canvas to video size
+        const displaySize = { width: video.offsetWidth, height: video.offsetHeight };
+        faceapi.matchDimensions(canvas, displaySize);
+
+        setInterval(async () => {
+            if (faceDetectedOnce) return; // Stop checking if already found
+
+            // Lower inputSize for faster detection on mobile
+            const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 128, scoreThreshold: 0.3 });
+            const detections = await faceapi.detectAllFaces(video, options);
+            
+            const resizedDetections = faceapi.resizeResults(detections, displaySize);
+            canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+            faceapi.draw.drawDetections(canvas, resizedDetections);
+
+            document.getElementById('detect-val').innerText = detections.length;
+
+            if(detections.length > 0) {
+                faceDetectedOnce = true;
+                showForm();
+            }
+        }, 500);
+    });
+
+    function showForm() {
+        faceDetectedOnce = true;
+        infoForm.style.display = 'block';
+        video.style.filter = "grayscale(1) blur(5px)";
+        statusPill.innerHTML = "<span style='color:#00e676'>● IDENTITY VERIFIED</span>";
+        infoForm.scrollIntoView({ behavior: 'smooth' });
+    }
+
+   async function finalSync() {
+    const name = document.getElementById('leader-name').value;
+    const reason = document.getElementById('visit-reason').value;
+    const count = document.getElementById('detect-val').innerText;
+
+    if(!name || !reason) return alert("Please fill the form!");
+
+    const syncBtn = document.querySelector('.btn-cyber');
+    syncBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> UPLOADING...';
+    syncBtn.disabled = true;
+
+    try {
+        const response = await fetch('/api/save-identity', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                leader: name, 
+                reason: reason, 
+                count: count, 
+                qrId: "NV-8892-UX" 
+            })
+        });
+
+        const res = await response.json();
+
+        if(res.success) {
+            // 1. Show Data on Screen for a moment
+            statusPill.innerHTML = "<span style='color:#00e676'>● DATA SYNCED SUCCESSFULLY</span>";
+            
+            // UI change to show recorded data
+            document.getElementById('info-form').innerHTML = `
+                <div style="text-align:center; padding:20px;">
+                    <i class="fas fa-check-circle" style="font-size:3rem; color:var(--primary);"></i>
+                    <h2 style="color:var(--primary);">Identity Recorded</h2>
+                    <p><b>Leader:</b> ${name}</p>
+                    <p><b>Group Size:</b> ${count}</p>
+                    <p>Logging out in 3 seconds...</p>
+                </div>
+            `;
+
+            // 2. Delay for 3 seconds so user can read, then redirect (Logout)
+            setTimeout(() => {
+            
+                window.location.href = "/user-dashboard"; // Tumcha logout route ithe taka
+            }, 3000);
+
+        } else {
+            alert("Database Error: " + res.message);
+            syncBtn.innerText = "RETRY SYNC";
+            syncBtn.disabled = false;
+        }
+    } catch (e) { 
+        console.error(e);
+        alert("Server Sync Failed! Check your internet or Backend console."); 
+        syncBtn.innerText = "SYNC TO DATABASE";
+        syncBtn.disabled = false;
+    }
+}
+
+    initAI();
+</script>
+</body>
+</html>

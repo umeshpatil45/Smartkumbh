@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kumbh Wheels | Mega Fleet Pro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #00e676; 
+            --secondary: #2979ff; 
+            --warning: #ffea00; 
+            --danger: #ff3d00;
+            --dark-card: #1c1c24;
+        }
+
+        body {
+            background-color: #050508;
+            color: #ffffff;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+            padding-bottom: 50px;
+        }
+
+        /* --- BACK BUTTON STYLE --- */
+        .back-btn {
+            width: 45px; height: 45px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+        }
+
+        .app-header {
+            padding: 30px 25px 40px;
+            background: linear-gradient(180deg, rgba(41, 121, 255, 0.1) 0%, transparent 100%);
+        }
+
+        .map-container {
+            margin: 0 20px 30px;
+            height: 180px;
+            background: #111;
+            border-radius: 30px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+        }
+        .map-overlay {
+            position: absolute; bottom: 10px; left: 10px;
+            background: rgba(0,0,0,0.7); padding: 5px 12px;
+            border-radius: 10px; font-size: 10px; color: var(--primary);
+        }
+
+        .h-scroll {
+            display: flex; gap: 15px; overflow-x: auto;
+            padding: 10px 20px 25px; scrollbar-width: none;
+        }
+        .h-scroll::-webkit-scrollbar { display: none; }
+
+        .cat-card {
+            min-width: 90px; background: var(--dark-card);
+            border-radius: 20px; padding: 12px; text-align: center;
+            border: 1px solid rgba(255,255,255,0.05); transition: 0.3s;
+            cursor: pointer;
+        }
+        .cat-card.active { border-color: var(--secondary); background: rgba(41, 121, 255, 0.15); }
+
+        .recommend-card {
+            min-width: 290px;
+            background: linear-gradient(145deg, #1c1c24, #13131a);
+            border-radius: 32px; padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            position: relative; overflow: hidden;
+            transition: 0.4s; cursor: pointer;
+        }
+        .recommend-card:active { transform: scale(0.95); }
+        
+        .card-bg-icon {
+            position: absolute; right: -15px; bottom: -15px;
+            font-size: 7rem; opacity: 0.04; transform: rotate(-10deg);
+        }
+
+        .price-badge {
+            background: rgba(255,255,255,0.1);
+            padding: 8px 15px; border-radius: 15px;
+            font-weight: 800; font-size: 1.2rem;
+        }
+
+        .pill-status {
+            font-size: 10px; font-weight: 800; padding: 5px 12px;
+            border-radius: 20px; margin-bottom: 15px; display: inline-block;
+        }
+
+        .accent-auto { border-bottom: 4px solid var(--warning); }
+        .accent-car { border-bottom: 4px solid var(--secondary); }
+        .accent-bus { border-bottom: 4px solid var(--primary); }
+        .accent-bike { border-bottom: 4px solid var(--danger); }
+        .accent-suv { border-bottom: 4px solid #aa00ff; }
+        .accent-mini { border-bottom: 4px solid #00bcd4; }
+
+        .search-trigger {
+            margin: -25px 20px 30px;
+            background: rgba(255,255,255,0.07);
+            backdrop-filter: blur(20px);
+            padding: 18px 25px; border-radius: 25px;
+            border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+        }
+
+        .btn-confirm {
+            background: linear-gradient(90deg, #2979ff, #00d2ff);
+            border: none; border-radius: 22px; padding: 18px;
+            width: 100%; font-weight: 800; color: white;
+        }
+
+        h5.section-label { font-weight: 800; padding: 0 25px; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+    <div class="app-header">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="back-btn" onclick="window.history.back()">
+                <i class="fas fa-chevron-left"></i>
+            </div>
+            <h6 class="text-secondary small fw-bold mb-0">NASHIK SMART MOBILITY</h6>
+            <i class="fas fa-bell text-secondary"></i>
+        </div>
+        <h1 class="fw-800">Your Journey,<br><span style="color:var(--secondary)">Our Priority</span></h1>
+    </div>
+
+    <div class="map-container">
+        <iframe width="100%" height="100%" frameborder="0" src="https://maps.google.com/maps?q=Nashik&t=&z=13&ie=UTF8&iwloc=&output=embed" style="filter: invert(90%) hue-rotate(180deg) brightness(0.7);"></iframe>
+        <div class="map-overlay"><i class="fas fa-satellite-dish fa-spin me-1"></i> Tracking Live Traffic</div>
+    </div>
+
+    <div class="search-trigger d-flex align-items-center" onclick="document.getElementById('pick').focus(); setRide('Custom Trip', 15);">
+        <div class="me-3">
+            <div style="width: 8px; height: 8px; background: var(--secondary); border-radius: 50%;"></div>
+            <div style="width: 2px; height: 15px; background: #333; margin-left: 3px;"></div>
+            <div style="width: 8px; height: 8px; border: 2px solid var(--primary); border-radius: 2px;"></div>
+        </div>
+        <span class="text-secondary small">Enter Drop Location...</span>
+    </div>
+
+    <div class="h-scroll">
+        <div class="cat-card active" onclick="filterRides('all', this)"><i class="fas fa-th text-info"></i><small>All</small></div>
+        <div class="cat-card" onclick="filterRides('car', this)"><i class="fas fa-car text-info"></i><small>Cabs</small></div>
+        <div class="cat-card" onclick="filterRides('auto', this)"><i class="fas fa-motorcycle text-warning"></i><small>Auto</small></div>
+        <div class="cat-card" onclick="filterRides('bike', this)"><i class="fas fa-bicycle text-danger"></i><small>Bikes</small></div>
+        <div class="cat-card" onclick="filterRides('bus', this)"><i class="fas fa-bus text-success"></i><small>Buses</small></div>
+    </div>
+
+    <h5 class="section-label" id="listLabel">20+ RIDES AVAILABLE</h5>
+
+    <div class="h-scroll" id="ridesWrapper">
+        </div>
+
+    <div class="modal fade" id="rideModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background: #0f0f14; border-radius: 40px; border: 1px solid #333;">
+                <div class="modal-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="w-25 mx-auto mb-3" style="height: 4px; background: #444; border-radius: 10px;" data-bs-dismiss="modal"></div>
+                        <h3 class="fw-800" id="vName">Confirm Ride</h3>
+                    </div>
+
+                    <div class="p-4 mb-4 rounded-4" style="background: #1c1c24; border: 1px solid #333;">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fas fa-circle text-info me-3" style="font-size: 10px;"></i>
+                            <input type="text" id="pick" class="form-control bg-transparent border-0 text-white p-0" placeholder="Pickup Location (e.g. Nashik Road)">
+                        </div>
+                        <hr style="background: #444;">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-map-marker-alt text-danger me-3"></i>
+                            <input type="text" id="drop" class="form-control bg-transparent border-0 text-white p-0" placeholder="Where to?">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between px-2 mb-4">
+                        <span class="text-secondary fw-bold">Estimated Total</span>
+                        <h3 class="fw-800 text-info mb-0" id="vPrice">₹0.00</h3>
+                    </div>
+
+                    <button class="btn-confirm" onclick="sendWhatsApp()">
+                        BOOK VIA WHATSAPP <i class="fab fa-whatsapp ms-2"></i>
+                    </button>
+                    <p class="text-center mt-3 small text-secondary" data-bs-dismiss="modal" style="cursor:pointer">Cancel</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentRate = 0;
+        let vehicle = "";
+        const modal = new bootstrap.Modal(document.getElementById('rideModal'));
+
+        const allRides = [
+            {n: 'Quick Auto', r: 12, cat: 'auto', a: 'accent-auto', i:'fa-motorcycle', s:'Nearby'},
+            {n: 'Prime Sedan', r: 18, cat: 'car', a: 'accent-car', i:'fa-car', s:'Comfort'},
+            {n: 'Moto Zip', r: 7, cat: 'bike', a: 'accent-bike', i:'fa-motorcycle', s:'Fast'},
+            {n: 'Innova SUV', r: 28, cat: 'car', a: 'accent-suv', i:'fa-shuttle-van', s:'Family'},
+            {n: 'Mini Hatch', r: 14, cat: 'car', a: 'accent-mini', i:'fa-car-side', s:'Solo'},
+            {n: 'Citylinc EV', r: 15, cat: 'bus', a: 'accent-bus', i:'fa-bus', s:'Economic'},
+            {n: 'BMW Elite', r: 150, cat: 'car', a: 'accent-car', i:'fa-crown', s:'Elite'},
+            {n: 'Shared Cab', r: 10, cat: 'car', a: 'accent-mini', i:'fa-users', s:'Cheap'},
+            {n: 'Pink Auto', r: 12, cat: 'auto', a: 'accent-auto', i:'fa-female', s:'Ladies'},
+            {n: 'Delivery', r: 9, cat: 'bike', a: 'accent-bike', i:'fa-box', s:'Service'},
+            {n: 'Airport XL', r: 50, cat: 'car', a: 'accent-suv', i:'fa-plane', s:'Travel'},
+            {n: 'Tourist Bus', r: 100, cat: 'bus', a: 'accent-bus', i:'fa-map', s:'Tours'},
+            {n: 'E-Rickshaw', r: 5, cat: 'auto', a: 'accent-auto', i:'fa-bolt', s:'Eco'},
+            {n: 'Night Cab', r: 40, cat: 'car', a: 'accent-car', i:'fa-moon', s:'Safe'},
+            {n: 'Intercity', r: 60, cat: 'car', a: 'accent-suv', i:'fa-road', s:'Long'},
+            {n: 'School Van', r: 15, cat: 'bus', a: 'accent-mini', i:'fa-bus-alt', s:'Kids'},
+            {n: 'Luxury Van', r: 80, cat: 'bus', a: 'accent-suv', i:'fa-shuttle-van', s:'VIP'},
+            {n: 'Electric Bike', r: 6, cat: 'bike', a: 'accent-bike', i:'fa-plug', s:'Green'},
+            {n: 'Local Bus', r: 10, cat: 'bus', a: 'accent-bus', i:'fa-bus', s:'Local'},
+            {n: 'Premium SUV', r: 45, cat: 'car', a: 'accent-suv', i:'fa-gem', s:'Premium'}
+        ];
+
+        function renderRides(filter = 'all') {
+            const wrapper = document.getElementById('ridesWrapper');
+            wrapper.innerHTML = '';
+            const filtered = filter === 'all' ? allRides : allRides.filter(r => r.cat === filter);
+            
+            filtered.forEach(t => {
+                wrapper.innerHTML += `
+                    <div class="recommend-card ${t.a}" onclick="setRide('${t.n}', ${t.r})">
+                        <i class="fas ${t.i} card-bg-icon"></i>
+                        <span class="pill-status" style="background: rgba(255,255,255,0.05); color: #fff;">${t.s}</span>
+                        <div class="d-flex justify-content-between align-items-start mb-4">
+                            <div><h4 class="fw-800 mb-0">${t.n}</h4><p class="text-secondary small">Available Now</p></div>
+                            <div class="price-badge">₹${t.r}/k</div>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function filterRides(cat, el) {
+            document.querySelectorAll('.cat-card').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            renderRides(cat);
+            document.getElementById('listLabel').innerText = cat.toUpperCase() + " RIDES AVAILABLE";
+        }
+
+        function setRide(name, rate) {
+            vehicle = name;
+            currentRate = rate;
+            document.getElementById('vName').innerText = name;
+            const dist = Math.floor(Math.random() * 10) + 5;
+            document.getElementById('vPrice').innerText = "₹" + (dist * currentRate) + ".00";
+            modal.show();
+        }
+
+        function sendWhatsApp() {
+            const p = document.getElementById('pick').value;
+            const d = document.getElementById('drop').value;
+            const pr = document.getElementById('vPrice').innerText;
+            if(!p || !d) return alert("Krupaya Pickup ani Drop location bhara!");
+
+            const msg = `🚀 *KUMBH WHEELS - NEW RIDE*%0A--------------------------%0A🚕 *Vehicle:* ${vehicle}%0A📍 *Pickup:* ${p}%0A🏁 *Drop:* ${d}%0A💰 *Fare:* ${pr}%0A👤 *Client Name:* <%= user.name %>`;
+            window.open(`https://wa.me/918459146033?text=${msg}`, '_blank');
+        }
+
+        // Initial Load
+        window.onload = () => renderRides();
+    </script>
+</body>
+</html>

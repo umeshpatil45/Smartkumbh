@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile | Nashik Verse</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #00e676;
+            --gold: #FFD700;
+            --glass: rgba(255, 255, 255, 0.08);
+            --bg-dark: #0b141a;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            height: 100%; width: 100%;
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-dark);
+            color: white;
+            overflow: hidden;
+        }
+
+        /* Profile Background */
+        .profile-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 280px;
+            background: linear-gradient(135deg, #004d40 0%, #00e676 100%);
+            z-index: -1; border-bottom-right-radius: 50px; border-bottom-left-radius: 50px;
+        }
+
+        .back-btn { position: absolute; top: 30px; left: 20px; color: white; font-size: 1.5rem; z-index: 10; cursor: pointer; }
+
+        .wrapper { width: 100%; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding-top: 50px; }
+
+        /* Avatar Section */
+        .avatar-container { position: relative; width: 120px; height: 120px; margin-bottom: 10px; }
+        .avatar { width: 100%; height: 100%; border-radius: 50%; border: 4px solid white; object-fit: cover; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .edit-badge { position: absolute; bottom: 5px; right: 5px; background: var(--gold); color: black; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; cursor: pointer; }
+
+        /* Stats Card */
+        .stats-row { display: flex; gap: 15px; margin: 20px 0; }
+        .stat-card { background: var(--glass); backdrop-filter: blur(10px); padding: 15px 20px; border-radius: 20px; text-align: center; border: 1px solid rgba(255,255,255,0.1); width: 110px; cursor: pointer; transition: 0.3s; }
+        .stat-card:active { transform: scale(0.9); }
+        .stat-card h2 { margin: 0; color: var(--primary); font-size: 1.4rem; }
+        .stat-card p { margin: 0; font-size: 0.7rem; opacity: 0.8; }
+
+        /* Settings List */
+        .settings-container { width: 90%; max-width: 380px; background: var(--glass); backdrop-filter: blur(20px); border-radius: 30px; padding: 10px; border: 1px solid rgba(255,255,255,0.1); }
+        .setting-item { display: flex; align-items: center; gap: 15px; padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+        .setting-item:last-child { border-bottom: none; }
+        .setting-item i:first-child { width: 25px; color: var(--primary); font-size: 1.1rem; }
+        .setting-item span { flex: 1; font-size: 0.9rem; }
+
+        /* CUSTOM MODAL SYSTEM */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(8px); }
+        .modal-content { background: #121f27; width: 85%; max-width: 320px; border-radius: 30px; padding: 30px; border: 1px solid rgba(255,255,255,0.1); text-align: center; transform: translateY(20px); transition: 0.3s; }
+        .modal-overlay.active { display: flex; }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+        
+        .modal-input { width: 100%; padding: 12px; margin: 15px 0; border-radius: 12px; border: 1px solid var(--primary); background: transparent; color: white; outline: none; box-sizing: border-box; }
+        .modal-btn { background: var(--primary); color: black; border: none; padding: 12px; border-radius: 15px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
+
+        /* TOAST NOTIFICATION (Modern Alert) */
+        .toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: var(--primary); color: black; padding: 12px 25px; border-radius: 50px; font-weight: bold; font-size: 0.9rem; z-index: 1000; transition: 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); box-shadow: 0 5px 15px rgba(0, 230, 118, 0.4); }
+        .toast.show { bottom: 40px; }
+
+        .save-list { text-align: left; margin-top: 15px; }
+        .save-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 0.85rem; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 15px; }
+
+        .robo-profile { position: fixed; right: -30px; bottom: -10px; width: 220px; z-index: -1; opacity: 0.3; }
+    </style>
+</head>
+<body>
+
+    <div id="toast" class="toast">Action Successful!</div>
+
+    <div class="profile-bg"></div>
+    <div class="back-btn" onclick="history.back()"><i class="fas fa-arrow-left"></i></div>
+
+    <div class="wrapper">
+        <div class="profile-header">
+            <div class="avatar-container">
+                <img src="/images/user-avatar.jpg" id="user-photo" class="avatar" onerror="this.src='https://ui-avatars.com/api/?name=Nashik+Explorer&background=00e676&color=fff'">
+                <label for="file-input" class="edit-badge"><i class="fas fa-camera"></i></label>
+                <input type="file" id="file-input" hidden onchange="previewImage(event)">
+            </div>
+            <h2 id="user-name-display" style="margin: 5px 0;">Nashik Explorer</h2>
+            <p style="margin: 0; opacity: 0.7; font-size: 0.8rem;">nashik.user@email.com</p>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-card" onclick="openModal('visitedModal')">
+                <h2>12</h2>
+                <p>Places Visited</p>
+            </div>
+            <div class="stat-card" onclick="addCoins()">
+                <h2 id="coin-val">450</h2>
+                <p>Nashik Coins</p>
+            </div>
+        </div>
+
+        <div class="settings-container">
+            <div class="setting-item" onclick="openModal('nameModal')">
+                <i class="fas fa-user-edit"></i>
+                <span>Change Profile Name</span>
+                <i class="fas fa-chevron-right" style="font-size: 0.7rem; opacity: 0.3;"></i>
+            </div>
+            <div class="setting-item" onclick="openModal('saveModal')">
+                <i class="fas fa-bookmark"></i>
+                <span>Saved Locations</span>
+                <i class="fas fa-chevron-right" style="font-size: 0.7rem; opacity: 0.3;"></i>
+            </div>
+            <div class="setting-item" style="color: #ff5252;" onclick="openModal('logoutModal')">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Log Out</span>
+            </div>
+        </div>
+
+        <img src="/images/Robo.png" class="robo-profile" alt="Robo">
+    </div>
+
+    <div id="nameModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Edit Name</h3>
+            <input type="text" id="name-input" class="modal-input" placeholder="Enter your name...">
+            <button class="modal-btn" onclick="updateName()">SAVE NAME</button>
+            <button class="modal-btn" style="background:transparent; color:white;" onclick="closeModal('nameModal')">CANCEL</button>
+        </div>
+    </div>
+
+    <div id="visitedModal" class="modal-overlay">
+        <div class="modal-content">
+            <i class="fas fa-medal" style="font-size: 3rem; color: var(--gold); margin-bottom: 15px;"></i>
+            <h3>Explorer Level 1</h3>
+            <p style="font-size: 0.85rem; opacity: 0.8;">You've explored 12 gems of Nashik. Reach 20 to unlock Level 2!</p>
+            <button class="modal-btn" onclick="closeModal('visitedModal')">CONTINUE</button>
+        </div>
+    </div>
+
+    <div id="saveModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Your Saved Spots</h3>
+            <div class="save-list">
+                <div class="save-item"><i class="fas fa-star" style="color:var(--gold)"></i> Sula Vineyards</div>
+                <div class="save-item"><i class="fas fa-star" style="color:var(--gold)"></i> Pandavleni Caves</div>
+                <div class="save-item"><i class="fas fa-star" style="color:var(--gold)"></i> Trimbakeshwar</div>
+            </div>
+            <button class="modal-btn" onclick="closeModal('saveModal')">BACK</button>
+        </div>
+    </div>
+
+    <div id="logoutModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 style="color: #ff5252;">Leaving So Soon?</h3>
+            <p style="font-size: 0.85rem; opacity: 0.8;">Your progress is saved. See you again in Nashik!</p>
+            <button class="modal-btn" style="background: #ff5252; color: white;" onclick="location.href='/login'">YES, LOGOUT</button>
+            <button class="modal-btn" style="background: transparent; color: white;" onclick="closeModal('logoutModal')">STAY HERE</button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. Toast Notification System ---
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+
+        // --- 2. Modal Controls ---
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        // --- 3. Name Update Logic ---
+        function updateName() {
+            const newName = document.getElementById('name-input').value;
+            if (newName.trim() !== "") {
+                document.getElementById('user-name-display').innerText = newName;
+                closeModal('nameModal');
+                showToast("Profile name updated! ✅");
+            } else {
+                showToast("Please enter a valid name! ❌");
+            }
+        }
+
+        // --- 4. Coin Logic ---
+        let coins = 450;
+        function addCoins() {
+            coins += 10;
+            document.getElementById('coin-val').innerText = coins;
+            showToast("+10 Nashik Coins earned! 💰");
+        }
+
+        // --- 5. Photo Preview ---
+        function previewImage(event) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                document.getElementById('user-photo').src = reader.result;
+                showToast("Profile picture updated! 📸");
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    </script>
+</body>
+</html>

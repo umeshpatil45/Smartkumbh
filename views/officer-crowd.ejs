@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crowd Control | KumbhVerse AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root { 
+            --kumbh-orange: #ff6a00; 
+            --bg-dark: #070708; 
+            --sidebar-bg: #0d0d0f;
+            --card-glass: rgba(255, 255, 255, 0.03);
+            --border-glass: rgba(255, 255, 255, 0.08);
+        }
+        
+        body { background: var(--bg-dark); color: white; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; transition: background 0.5s ease; }
+        
+        /* Emergency Mode Effect */
+        body.emergency-active { background: #330000 !important; }
+        body.emergency-active .sidebar { border-right: 1px solid #ff0000; }
+
+        .sidebar { 
+            width: 260px; height: 100vh; background: var(--sidebar-bg); 
+            position: fixed; border-right: 1px solid var(--border-glass); 
+            padding: 25px 15px; z-index: 1000;
+        }
+
+        .nav-item {
+            color: rgba(255,255,255,0.5); text-decoration: none; padding: 12px 18px;
+            border-radius: 12px; margin-bottom: 5px; display: flex; align-items: center;
+            gap: 12px; transition: 0.3s; font-size: 0.95rem;
+        }
+
+        .nav-item:hover, .nav-item.active { background: rgba(255, 106, 0, 0.1); color: var(--kumbh-orange); }
+
+        .main-content { margin-left: 260px; padding: 35px; }
+
+        .module-card {
+            background: var(--card-glass); border: 1px solid var(--border-glass);
+            border-radius: 24px; padding: 25px; backdrop-filter: blur(10px); height: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .stat-value { font-size: 1.8rem; font-weight: 800; color: var(--kumbh-orange); }
+        
+        .heatmap-container { height: 300px; width: 100%; position: relative; }
+
+        .status-pill { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; }
+        .bg-crowd-high { background: rgba(255, 77, 77, 0.2); color: #ff4d4d; border: 1px solid #ff4d4d; }
+
+        /* Camera Box with Scanning Effect */
+        .camera-box { position: relative; height: 200px; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-glass); }
+        .camera-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            border: 2px solid transparent; background: linear-gradient(rgba(0, 255, 0, 0.1) 0%, transparent 50%);
+            animation: scan 3s infinite linear; pointer-events: none;
+        }
+        @keyframes scan { 0% { top: -100%; } 100% { top: 100%; } }
+        
+        .ai-label { position: absolute; top: 10px; left: 10px; font-size: 10px; background: rgba(0, 255, 0, 0.7); color: black; padding: 2px 5px; border-radius: 3px; }
+
+        .swal2-popup { background: #121214 !important; color: white !important; border-radius: 20px; }
+    </style>
+</head>
+<body>
+
+<audio id="emergencySiren" loop>
+    <source src="https://www.soundjay.com/buttons/beep-01a.mp3" type="audio/mpeg">
+</audio>
+
+<div class="sidebar">
+    <div class="d-flex align-items-center gap-2 mb-5 px-3">
+        <div style="width:30px; height:30px; background:var(--kumbh-orange); border-radius:8px;"></div>
+        <h4 class="m-0 fw-bold">KumbhVerse</h4>
+    </div>
+    
+    <nav>
+        <div class="small text-uppercase text-muted mb-3 px-3">Core Control</div>
+        <a href="/officer-dashboard" class="nav-item"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+        <a href="/officer-crowd" class="nav-item active"><i class="fa-solid fa-users"></i> Crowd Control</a>
+        <a href="/officer-route" class="nav-item"><i class="fa-solid fa-map-location-dot"></i> Route & Traffic</a>
+        
+        <div class="small text-uppercase text-muted mt-4 mb-3 px-3">Emergency</div>
+        <a href="/officer-medical-camp" class="nav-item"><i class="fa-solid fa-truck-medical"></i> Medical Camp</a>
+        <a href="/officer-missing" class="nav-item"><i class="fa-solid fa-person-circle-exclamation"></i> Missing Portal</a>
+        
+        <div class="small text-uppercase text-muted mt-4 mb-3 px-3">Operations</div>
+        <a href="/officer-seva" class="nav-item"><i class="fa-solid fa-calendar-check"></i> Seva Monitoring</a>
+        <a href="/officer-resource" class="nav-item"><i class="fa-solid fa-user-shield"></i> Resource Map</a>
+        
+        <a href="/logout" class="nav-item text-danger mt-5"><i class="fa-solid fa-power-off"></i> Logout</a>
+    </nav>
+</div>
+
+<div class="main-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <span class="badge bg-warning text-dark mb-2">Live Monitoring: <%= assignedZone %></span>
+            <h2 class="fw-bold m-0">Crowd Control Center</h2>
+        </div>
+        <button id="btnEmergency" class="btn btn-danger fw-bold px-4" onclick="triggerEmergency()"><i class="fa-solid fa-triangle-exclamation me-2"></i> EMERGENCY ALERT</button>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-8">
+            <div class="module-card">
+                <h5 class="fw-bold mb-4">Crowd Inflow Trend</h5>
+                <div class="heatmap-container">
+                    <canvas id="crowdChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="module-card">
+                <h5 class="fw-bold mb-3">Live CCTV AI Feed</h5>
+                <div class="camera-box">
+                    <video id="video-preview" autoplay playsinline style="width:100%; height:100%; object-fit:cover;"></video>
+                    <div class="camera-overlay"></div>
+                    <div class="ai-label">AI: TRACKING_CROWD_DENSITY</div>
+                    <div id="ai-box" style="position:absolute; border:1px solid #0f0; width:50px; height:50px; top:40%; left:30%; display:none;"></div>
+                </div>
+                <div class="mt-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <small class="text-muted">AI Detection</small>
+                        <span id="density-pill" class="status-pill bg-crowd-high">Scanning...</span>
+                    </div>
+                    <p id="recommendation" class="small text-muted mb-0">Analyzing patterns...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-12">
+            <div class="module-card">
+                <h5 class="fw-bold mb-3">Zone-wise Crowd Distribution</h5>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover border-secondary">
+                        <thead>
+                            <tr class="text-muted">
+                                <th>Sector</th>
+                                <th>Capacity</th>
+                                <th>Current Occupancy</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="zoneTableBody">
+                            <tr>
+                                <td>Sector A1 (Ghat Area)</td>
+                                <td>50,000</td>
+                                <td id="occ-1">42,500</td>
+                                <td><span id="badge-1" class="badge bg-danger">Critical</span></td>
+                                <td><button class="btn btn-sm btn-outline-warning" onclick="divertTraffic('Sector A1')">Divert</button></td>
+                            </tr>
+                            <tr>
+                                <td>Sector A2 (Parking)</td>
+                                <td>20,000</td>
+                                <td id="occ-2">12,100</td>
+                                <td><span id="badge-2" class="badge bg-success">Stable</span></td>
+                                <td><button class="btn btn-sm btn-outline-warning" onclick="divertTraffic('Sector A2')">Divert</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. Chart Logic
+    const ctx = document.getElementById('crowdChart').getContext('2d');
+    const crowdChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['12:00', '12:15', '12:30', '12:45', '01:00', '01:15', '01:30'],
+            datasets: [{
+                label: 'Crowd Count (K)',
+                data: [80, 85, 92, 88, 95, 99, 96],
+                borderColor: '#ff6a00',
+                backgroundColor: 'rgba(255, 106, 0, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointBackgroundColor: '#ff6a00'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888' } },
+                x: { grid: { display: false }, ticks: { color: '#888' } }
+            }
+        }
+    });
+
+    // 2. Real-time Updates logic
+    setInterval(() => {
+        const newVal = Math.floor(Math.random() * (99 - 85 + 1)) + 85;
+        crowdChart.data.datasets[0].data.shift();
+        crowdChart.data.datasets[0].data.push(newVal);
+        crowdChart.update();
+
+        // Update Occupancy numbers
+        let count = (newVal * 450).toLocaleString();
+        document.getElementById('occ-1').innerText = count;
+        
+        // Update Density Status Pill
+        const pill = document.getElementById('density-pill');
+        const rec = document.getElementById('recommendation');
+        if (newVal > 95) {
+            pill.innerText = "Critical Density";
+            pill.className = "status-pill bg-danger";
+            rec.innerText = "Action: Redirecting crowd to Gate 5 immediately.";
+        } else {
+            pill.innerText = "High Density";
+            pill.className = "status-pill bg-crowd-high";
+            rec.innerText = "Recommendation: Monitor Gate 3 inflow.";
+        }
+    }, 4000);
+
+    // 3. Camera Setup
+    async function setupCamera() {
+        const video = document.getElementById('video-preview');
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            video.srcObject = stream;
+            document.getElementById('ai-box').style.display = 'block';
+        } catch (err) { 
+            console.log("Camera access blocked - using simulation mode");
+        }
+    }
+    setupCamera();
+
+    // 4. Emergency Trigger Working
+    let isEmergency = false;
+    function triggerEmergency() {
+        const siren = document.getElementById('emergencySiren');
+        const btn = document.getElementById('btnEmergency');
+        
+        if (!isEmergency) {
+            Swal.fire({
+                title: 'Confirm Emergency Alert?',
+                text: "This will alert all on-field officers!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'ACTIVATE NOW'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.body.classList.add('emergency-active');
+                    siren.play();
+                    btn.innerHTML = "<i class='fa-solid fa-stop me-2'></i> STOP ALERT";
+                    isEmergency = true;
+                    Swal.fire('ALERT ACTIVE', 'All sectors notified.', 'error');
+                }
+            });
+        } else {
+            document.body.classList.remove('emergency-active');
+            siren.pause();
+            btn.innerHTML = "<i class='fa-solid fa-triangle-exclamation me-2'></i> EMERGENCY ALERT";
+            isEmergency = false;
+        }
+    }
+
+    // 5. Divert Action
+    function divertTraffic(sector) {
+        Swal.fire({
+            title: 'Divert Traffic from ' + sector + '?',
+            text: "Opening auxiliary gates for crowd flow.",
+            icon: 'info',
+            confirmButtonText: 'Confirm'
+        }).then(() => {
+            Swal.fire('Success', 'Diversion plan activated for ' + sector, 'success');
+        });
+    }
+</script>
+
+</body>
+</html>
